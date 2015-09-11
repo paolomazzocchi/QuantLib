@@ -52,26 +52,65 @@ namespace QuantLib {
                                          bool endOfMonth,
                                          const DayCounter& dayCounter,
                                          const Handle<Quote>& convAdj,
-                                         Futures::Type type)
-    : RateHelper(price), convAdj_(convAdj) {
+                                         Futures::Type type,
+                                         bool intermediateInterp,
+                                         Pillar::Choice pillar,
+                                         Date customPillarDate)
+    : RateHelper(price), convAdj_(convAdj), 
+      intermediateInterp_(intermediateInterp){
+        Size n = lengthInMonths - 1;
+        earliestDate_ = iborStartDate;
         switch (type) {
           case Futures::IMM:
-            QL_REQUIRE(IMM::isIMMdate(iborStartDate, false),
-                       iborStartDate << " is not a valid IMM date");
+            QL_REQUIRE(IMM::isIMMdate(earliestDate_, false),
+                       earliestDate_ << " is not a valid IMM date");
+            ConcatenateDate_ = IMM::nextDate(earliestDate_, false);
+            while (n > 0){
+                ConcatenateDate_ = IMM::nextDate(ConcatenateDate_, false);
+                n--;
+            }
             break;
           case Futures::ASX:
-            QL_REQUIRE(ASX::isASXdate(iborStartDate, false),
-                       iborStartDate << " is not a valid ASX date");
+            QL_REQUIRE(ASX::isASXdate(earliestDate_, false),
+                       earliestDate_ << " is not a valid ASX date");
+            ConcatenateDate_ = ASX::nextDate(earliestDate_, false);
+            while (n > 0){
+                ConcatenateDate_ = ASX::nextDate(ConcatenateDate_, false);
+                n--;
+            }
             break;
           default:
             QL_FAIL("unknown futures type (" << Integer(type) << ")");
         }
-        earliestDate_ = iborStartDate;
-        maturityDate_ = calendar.advance(iborStartDate, lengthInMonths*Months,
+        maturityDate_ = calendar.advance(earliestDate_, lengthInMonths*Months,
                                          convention, endOfMonth);
         yearFraction_ = dayCounter.yearFraction(earliestDate_, maturityDate_);
-        pillarDate_ = latestDate_ = latestRelevantDate_ = maturityDate_;
-
+        yearFractionConcatenate_ =
+                     dayCounter.yearFraction(earliestDate_, ConcatenateDate_);
+        latestRelevantDate_ = maturityDate_;
+        switch (pillar) {
+          case Pillar::MaturityDate:
+            pillarDate_ = maturityDate_;
+            break;
+          case Pillar::LastRelevantDate:
+            pillarDate_ = latestRelevantDate_;
+            break;
+          case Pillar::CustomDate:
+            pillarDate_ = customPillarDate;
+            QL_REQUIRE(pillarDate_ >= earliestDate_,
+                "pillar date (" << pillarDate_ << ") must be later "
+                "than or equal to the instrument's earliest date (" <<
+                earliestDate_ << ")");
+            QL_REQUIRE(pillarDate_ <= std::max(latestRelevantDate_, ConcatenateDate_),
+                "pillar date (" << pillarDate_ << ") must be before "
+                "or equal to the maximum between instrument's latest relevant "
+                "date and the next future start date (" <<
+                std::max(latestRelevantDate_, ConcatenateDate_) << ")");
+            break;
+          default:
+            QL_FAIL("unknown Pillar::Choice(" << Integer(pillar) << ")");
+        }
+        latestDate_ = pillarDate_; // backward compatibility
         registerWith(convAdj_);
     }
 
@@ -83,27 +122,67 @@ namespace QuantLib {
                                          bool endOfMonth,
                                          const DayCounter& dayCounter,
                                          Rate convAdj,
-                                         Futures::Type type)
+                                         Futures::Type type,
+                                         bool intermediateInterp,
+                                         Pillar::Choice pillar,
+                                         Date customPillarDate)
     : RateHelper(price),
-      convAdj_(Handle<Quote>(shared_ptr<Quote>(new SimpleQuote(convAdj))))
+      convAdj_(Handle<Quote>(shared_ptr<Quote>(new SimpleQuote(convAdj)))),
+      intermediateInterp_(intermediateInterp)
     {
+        Size n = lengthInMonths - 1;
+        earliestDate_ = iborStartDate;
         switch (type) {
           case Futures::IMM:
-            QL_REQUIRE(IMM::isIMMdate(iborStartDate, false),
-                iborStartDate << " is not a valid IMM date");
+            QL_REQUIRE(IMM::isIMMdate(earliestDate_, false),
+                       earliestDate_ << " is not a valid IMM date");
+            ConcatenateDate_ = IMM::nextDate(earliestDate_, false);
+            while (n > 0){
+                   ConcatenateDate_ = IMM::nextDate(ConcatenateDate_, false);
+                   n--;
+            }
             break;
           case Futures::ASX:
-            QL_REQUIRE(ASX::isASXdate(iborStartDate, false),
-                iborStartDate << " is not a valid ASX date");
+            QL_REQUIRE(ASX::isASXdate(earliestDate_, false),
+                       earliestDate_ << " is not a valid ASX date");
+            ConcatenateDate_ = ASX::nextDate(earliestDate_, false);
+            while (n > 0){
+                ConcatenateDate_ = ASX::nextDate(ConcatenateDate_, false);
+                n--;
+            }
             break;
           default:
             QL_FAIL("unknown futures type (" << Integer(type) << ")");
         }
-        earliestDate_ = iborStartDate;
-        maturityDate_ = calendar.advance(iborStartDate, lengthInMonths*Months,
-            convention, endOfMonth);
+        maturityDate_ = calendar.advance(earliestDate_, lengthInMonths*Months,
+                                         convention, endOfMonth);
         yearFraction_ = dayCounter.yearFraction(earliestDate_, maturityDate_);
-        pillarDate_ = latestDate_ = latestRelevantDate_ = maturityDate_;
+        yearFractionConcatenate_ = 
+                      dayCounter.yearFraction(earliestDate_, ConcatenateDate_);
+        latestRelevantDate_ = maturityDate_;
+        switch (pillar) {
+          case Pillar::MaturityDate:
+            pillarDate_ = maturityDate_;
+            break;
+          case Pillar::LastRelevantDate:
+            pillarDate_ = latestRelevantDate_;
+            break;
+          case Pillar::CustomDate:
+            pillarDate_ = customPillarDate;
+            QL_REQUIRE(pillarDate_ >= earliestDate_,
+                "pillar date (" << pillarDate_ << ") must be later "
+                "than or equal to the instrument's earliest date (" <<
+                earliestDate_ << ")");
+            QL_REQUIRE(pillarDate_ <= std::max(latestRelevantDate_, ConcatenateDate_),
+                "pillar date (" << pillarDate_ << ") must be before "
+                "or equal to the maximum between instrument's latest relevant "
+                "date and the next future start date (" <<
+                std::max(latestRelevantDate_, ConcatenateDate_) << ")");
+            break;
+          default:
+            QL_FAIL("unknown Pillar::Choice(" << Integer(pillar) << ")");
+        }
+        latestDate_ = pillarDate_; // backward compatibility
     }
 
     FuturesRateHelper::FuturesRateHelper(const Handle<Quote>& price,
@@ -112,7 +191,9 @@ namespace QuantLib {
                                          const DayCounter& dayCounter,
                                          const Handle<Quote>& convAdj,
                                          Futures::Type type)
-    : RateHelper(price), convAdj_(convAdj) {
+    : RateHelper(price), convAdj_(convAdj),
+      intermediateInterp_(true)
+    {
         switch (type) {
           case Futures::IMM:
             QL_REQUIRE(IMM::isIMMdate(iborStartDate, false),
@@ -153,6 +234,7 @@ namespace QuantLib {
         }
         earliestDate_ = iborStartDate;
         yearFraction_ = dayCounter.yearFraction(earliestDate_, maturityDate_);
+        yearFractionConcatenate_ = yearFraction_;
         pillarDate_ = latestDate_ = latestRelevantDate_ = maturityDate_;
 
         registerWith(convAdj_);
@@ -165,7 +247,8 @@ namespace QuantLib {
                                          Rate convAdj,
                                          Futures::Type type)
     : RateHelper(price),
-      convAdj_(Handle<Quote>(shared_ptr<Quote>(new SimpleQuote(convAdj))))
+      convAdj_(Handle<Quote>(shared_ptr<Quote>(new SimpleQuote(convAdj)))),
+      intermediateInterp_(true)
     {
         switch (type) {
           case Futures::IMM:
@@ -207,6 +290,7 @@ namespace QuantLib {
         }
         earliestDate_ = iborStartDate;
         yearFraction_ = dayCounter.yearFraction(earliestDate_, maturityDate_);
+        yearFractionConcatenate_ = yearFraction_;
         pillarDate_ = latestDate_ = latestRelevantDate_ = maturityDate_;
     }
 
@@ -214,27 +298,60 @@ namespace QuantLib {
                                          const Date& iborStartDate,
                                          const shared_ptr<IborIndex>& i,
                                          const Handle<Quote>& convAdj,
-                                         Futures::Type type)
-    : RateHelper(price), convAdj_(convAdj) {
+                                         Futures::Type type,
+                                         bool intermediateInterp,
+                                         Pillar::Choice pillar,
+                                         Date customPillarDate)
+    : RateHelper(price), convAdj_(convAdj),
+      intermediateInterp_(intermediateInterp) {
+        earliestDate_ = iborStartDate;
+        const Calendar& cal = i->fixingCalendar();
+        maturityDate_ = cal.advance(earliestDate_, i->tenor(),
+                                    i->businessDayConvention());
         switch (type) {
           case Futures::IMM:
-            QL_REQUIRE(IMM::isIMMdate(iborStartDate, false),
-                       iborStartDate << " is not a valid IMM date");
+            QL_REQUIRE(IMM::isIMMdate(earliestDate_, false),
+                       earliestDate_ << " is not a valid IMM date");
+            ConcatenateDate_ = IMM::nextDate(
+                  Date(1, maturityDate_.month(), maturityDate_.year()), false);
             break;
           case Futures::ASX:
-            QL_REQUIRE(ASX::isASXdate(iborStartDate, false),
-                       iborStartDate << " is not a valid ASX date");
+            QL_REQUIRE(ASX::isASXdate(earliestDate_, false),
+                       earliestDate_ << " is not a valid ASX date");
+            ConcatenateDate_ = ASX::nextDate(
+                  Date(1, maturityDate_.month(), maturityDate_.year()), false);
             break;
           default:
             QL_FAIL("unknown futures type (" << Integer(type) << ")");
         }
-        earliestDate_ = iborStartDate;
-        const Calendar& cal = i->fixingCalendar();
-        maturityDate_ = cal.advance(iborStartDate, i->tenor(),
-                                    i->businessDayConvention());
         yearFraction_ = i->dayCounter().yearFraction(earliestDate_,
                                                      maturityDate_);
-        pillarDate_ = latestDate_ = latestRelevantDate_ = maturityDate_;
+        yearFractionConcatenate_ = i->dayCounter().yearFraction(earliestDate_,
+                                                             ConcatenateDate_);
+        latestRelevantDate_ = maturityDate_;
+        switch (pillar) {
+          case Pillar::MaturityDate:
+            pillarDate_ = maturityDate_;
+            break;
+          case Pillar::LastRelevantDate:
+            pillarDate_ = latestRelevantDate_;
+            break;
+          case Pillar::CustomDate:
+            pillarDate_ = customPillarDate;
+            QL_REQUIRE(pillarDate_ >= earliestDate_,
+                "pillar date (" << pillarDate_ << ") must be later "
+                "than or equal to the instrument's earliest date (" <<
+                earliestDate_ << ")");
+            QL_REQUIRE(pillarDate_ <= std::max(latestRelevantDate_, ConcatenateDate_),
+                "pillar date (" << pillarDate_ << ") must be before "
+                "or equal to the maximum between instrument's latest relevant "
+                "date and the next future start date (" <<
+                std::max(latestRelevantDate_, ConcatenateDate_) << ")");
+            break;
+          default:
+            QL_FAIL("unknown Pillar::Choice(" << Integer(pillar) << ")");
+        }
+        latestDate_ = pillarDate_; // backward compatibility
 
         registerWith(convAdj);
     }
@@ -243,35 +360,76 @@ namespace QuantLib {
                                          const Date& iborStartDate,
                                          const shared_ptr<IborIndex>& i,
                                          Rate convAdj,
-                                         Futures::Type type)
+                                         Futures::Type type,
+                                         bool intermediateInterp,
+                                         Pillar::Choice pillar,
+                                         Date customPillarDate)
     : RateHelper(price),
-      convAdj_(Handle<Quote>(shared_ptr<Quote>(new SimpleQuote(convAdj))))
+      convAdj_(Handle<Quote>(shared_ptr<Quote>(new SimpleQuote(convAdj)))),
+      intermediateInterp_(intermediateInterp)
     {
+        earliestDate_ = iborStartDate;
+        const Calendar& cal = i->fixingCalendar();
+        maturityDate_ = cal.advance(earliestDate_, i->tenor(),
+                                    i->businessDayConvention());
         switch (type) {
           case Futures::IMM:
-            QL_REQUIRE(IMM::isIMMdate(iborStartDate, false),
-                iborStartDate << " is not a valid IMM date");
+            QL_REQUIRE(IMM::isIMMdate(earliestDate_, false),
+                       earliestDate_ << " is not a valid IMM date");
+            ConcatenateDate_ = IMM::nextDate(
+                  Date(1, maturityDate_.month(), maturityDate_.year()), false);
             break;
           case Futures::ASX:
-            QL_REQUIRE(ASX::isASXdate(iborStartDate, false),
-                iborStartDate << " is not a valid ASX date");
+            QL_REQUIRE(ASX::isASXdate(earliestDate_, false),
+                       earliestDate_ << " is not a valid ASX date");
+            ConcatenateDate_ = ASX::nextDate(
+                  Date(1, maturityDate_.month(), maturityDate_.year()), false);
             break;
           default:
             QL_FAIL("unknown futures type (" << Integer(type) << ")");
         }
-        earliestDate_ = iborStartDate;
-        const Calendar& cal = i->fixingCalendar();
-        maturityDate_ = cal.advance(iborStartDate, i->tenor(),
-                                    i->businessDayConvention());
         yearFraction_ = i->dayCounter().yearFraction(earliestDate_,
-                                                     maturityDate_);
-        pillarDate_ = latestDate_ = latestRelevantDate_ = maturityDate_;
+            maturityDate_);
+        yearFractionConcatenate_ = i->dayCounter().yearFraction(earliestDate_,
+            ConcatenateDate_);
+        latestRelevantDate_ = maturityDate_;
+        switch (pillar) {
+          case Pillar::MaturityDate:
+            pillarDate_ = maturityDate_;
+            break;
+          case Pillar::LastRelevantDate:
+            pillarDate_ = latestRelevantDate_;
+            break;
+          case Pillar::CustomDate:
+            pillarDate_ = customPillarDate;
+            QL_REQUIRE(pillarDate_ >= earliestDate_,
+                "pillar date (" << pillarDate_ << ") must be later "
+                "than or equal to the instrument's earliest date (" <<
+                earliestDate_ << ")");
+            QL_REQUIRE(pillarDate_ <= std::max(latestRelevantDate_, ConcatenateDate_),
+                "pillar date (" << pillarDate_ << ") must be before "
+                "or equal to the maximum between instrument's latest relevant "
+                "date and the next future start date (" <<
+                std::max(latestRelevantDate_, ConcatenateDate_) << ")");
+            break;
+          default:
+            QL_FAIL("unknown Pillar::Choice(" << Integer(pillar) << ")");
+        }
+        latestDate_ = pillarDate_; // backward compatibility
     }
 
     Real FuturesRateHelper::impliedQuote() const {
         QL_REQUIRE(termStructure_ != 0, "term structure not set");
-        Rate forwardRate = (termStructure_->discount(earliestDate_) /
-            termStructure_->discount(maturityDate_) - 1.0) / yearFraction_;
+        Rate forwardRate;
+        if (intermediateInterp_)
+            forwardRate = (termStructure_->discount(earliestDate_) /
+                termStructure_->discount(maturityDate_) - 1.0) / yearFraction_;
+        else{
+            Time coef = yearFraction_ / yearFractionConcatenate_;
+            forwardRate = (std::pow(termStructure_->discount(earliestDate_) /
+                          termStructure_->discount(ConcatenateDate_),coef) - 1.0) /
+                          yearFractionConcatenate_;
+        }
         Rate convAdj = convAdj_.empty() ? 0.0 : convAdj_->value();
         // Convexity, as FRA/futures adjustment, has been used in the
         // past to take into account futures margining vs FRA.

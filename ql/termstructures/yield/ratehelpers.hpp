@@ -56,7 +56,10 @@ namespace QuantLib {
                           bool endOfMonth,
                           const DayCounter& dayCounter,
                           const Handle<Quote>& convexityAdjustment = Handle<Quote>(),
-                          Futures::Type type = Futures::IMM);
+                          Futures::Type type = Futures::IMM,
+                          bool intermediateInterp = true,
+                          Pillar::Choice pillar = Pillar::LastRelevantDate,
+                          Date customPillarDate = Date());
         FuturesRateHelper(Real price,
                           const Date& iborStartDate,
                           Natural lengthInMonths,
@@ -65,7 +68,10 @@ namespace QuantLib {
                           bool endOfMonth,
                           const DayCounter& dayCounter,
                           Rate convexityAdjustment = 0.0,
-                          Futures::Type type = Futures::IMM);
+                          Futures::Type type = Futures::IMM,
+                          bool intermediateInterp = true,
+                          Pillar::Choice pillar = Pillar::LastRelevantDate,
+                          Date customPillarDate = Date());
         FuturesRateHelper(const Handle<Quote>& price,
                           const Date& iborStartDate,
                           const Date& iborEndDate,
@@ -82,12 +88,18 @@ namespace QuantLib {
                           const Date& iborStartDate,
                           const boost::shared_ptr<IborIndex>& iborIndex,
                           const Handle<Quote>& convexityAdjustment = Handle<Quote>(),
-                          Futures::Type type = Futures::IMM);
+                          Futures::Type type = Futures::IMM,
+                          bool intermediateInterp = true,
+                          Pillar::Choice pillar = Pillar::LastRelevantDate,
+                          Date customPillarDate = Date());
         FuturesRateHelper(Real price,
                           const Date& iborStartDate,
                           const boost::shared_ptr<IborIndex>& iborIndex,
                           Rate convexityAdjustment = 0.0,
-                          Futures::Type type = Futures::IMM);
+                          Futures::Type type = Futures::IMM,
+                          bool intermediateInterp = true,
+                          Pillar::Choice pillar = Pillar::LastRelevantDate,
+                          Date customPillarDate = Date());
         //! \name RateHelper interface
         //@{
         Real impliedQuote() const;
@@ -101,8 +113,10 @@ namespace QuantLib {
         void accept(AcyclicVisitor&);
         //@}
       private:
-        Time yearFraction_;
+        Time yearFraction_, yearFractionConcatenate_;
+        Date ConcatenateDate_;
         Handle<Quote> convAdj_;
+        bool intermediateInterp_;
     };
 
 
