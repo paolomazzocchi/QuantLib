@@ -113,7 +113,7 @@ namespace QuantLib {
         void accept(AcyclicVisitor&);
         //@}
       private:
-        Time yearFraction_, yearFractionConcatenate_;
+        Time yearFraction_;
         Date ConcatenateDate_;
         Handle<Quote> convAdj_;
         bool intermediateInterp_;

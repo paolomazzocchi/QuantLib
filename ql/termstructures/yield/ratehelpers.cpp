@@ -85,8 +85,6 @@ namespace QuantLib {
         maturityDate_ = calendar.advance(earliestDate_, lengthInMonths*Months,
                                          convention, endOfMonth);
         yearFraction_ = dayCounter.yearFraction(earliestDate_, maturityDate_);
-        yearFractionConcatenate_ =
-                     dayCounter.yearFraction(earliestDate_, ConcatenateDate_);
         latestRelevantDate_ = maturityDate_;
         switch (pillar) {
           case Pillar::MaturityDate:
@@ -157,8 +155,6 @@ namespace QuantLib {
         maturityDate_ = calendar.advance(earliestDate_, lengthInMonths*Months,
                                          convention, endOfMonth);
         yearFraction_ = dayCounter.yearFraction(earliestDate_, maturityDate_);
-        yearFractionConcatenate_ = 
-                      dayCounter.yearFraction(earliestDate_, ConcatenateDate_);
         latestRelevantDate_ = maturityDate_;
         switch (pillar) {
           case Pillar::MaturityDate:
@@ -234,7 +230,6 @@ namespace QuantLib {
         }
         earliestDate_ = iborStartDate;
         yearFraction_ = dayCounter.yearFraction(earliestDate_, maturityDate_);
-        yearFractionConcatenate_ = yearFraction_;
         pillarDate_ = latestDate_ = latestRelevantDate_ = maturityDate_;
 
         registerWith(convAdj_);
@@ -290,7 +285,6 @@ namespace QuantLib {
         }
         earliestDate_ = iborStartDate;
         yearFraction_ = dayCounter.yearFraction(earliestDate_, maturityDate_);
-        yearFractionConcatenate_ = yearFraction_;
         pillarDate_ = latestDate_ = latestRelevantDate_ = maturityDate_;
     }
 
@@ -326,8 +320,6 @@ namespace QuantLib {
         }
         yearFraction_ = i->dayCounter().yearFraction(earliestDate_,
                                                      maturityDate_);
-        yearFractionConcatenate_ = i->dayCounter().yearFraction(earliestDate_,
-                                                             ConcatenateDate_);
         latestRelevantDate_ = maturityDate_;
         switch (pillar) {
           case Pillar::MaturityDate:
@@ -390,8 +382,6 @@ namespace QuantLib {
         }
         yearFraction_ = i->dayCounter().yearFraction(earliestDate_,
             maturityDate_);
-        yearFractionConcatenate_ = i->dayCounter().yearFraction(earliestDate_,
-            ConcatenateDate_);
         latestRelevantDate_ = maturityDate_;
         switch (pillar) {
           case Pillar::MaturityDate:
@@ -425,10 +415,12 @@ namespace QuantLib {
             forwardRate = (termStructure_->discount(earliestDate_) /
                 termStructure_->discount(maturityDate_) - 1.0) / yearFraction_;
         else{
-            Time coef = yearFraction_ / yearFractionConcatenate_;
+            Real n = latestDate_ - earliestDate_;
+            Real n_conc = ConcatenateDate_ - earliestDate_;
+            Real coef = n/n_conc;
             forwardRate = (std::pow(termStructure_->discount(earliestDate_) /
                           termStructure_->discount(ConcatenateDate_),coef) - 1.0) /
-                          yearFractionConcatenate_;
+                          yearFraction_;
         }
         Rate convAdj = convAdj_.empty() ? 0.0 : convAdj_->value();
         // Convexity, as FRA/futures adjustment, has been used in the
