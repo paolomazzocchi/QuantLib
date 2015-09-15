@@ -415,7 +415,7 @@ namespace QuantLib {
             forwardRate = (termStructure_->discount(earliestDate_) /
                 termStructure_->discount(maturityDate_) - 1.0) / yearFraction_;
         else{
-            Real n = latestDate_ - earliestDate_;
+            Real n = latestRelevantDate_ - earliestDate_;
             Real n_conc = ConcatenateDate_ - earliestDate_;
             Real coef = n/n_conc;
             forwardRate = (std::pow(termStructure_->discount(earliestDate_) /
