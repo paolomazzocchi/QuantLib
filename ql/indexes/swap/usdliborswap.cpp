@@ -28,56 +28,56 @@ namespace QuantLib {
     UsdLiborSwapIsdaFixAm::UsdLiborSwapIsdaFixAm(
                                 const Period& tenor,
                                 const Handle<YieldTermStructure>& h)
-    : SwapIndex("UsdLiborSwapIsdaFixAm", // familyName
+    : SwapIndex(USDCurrency(),
+                "UsdLiborSwapIsdaFixAm", // familyName
                 tenor,
+                Thirty360(Thirty360::BondBasis), // fixedLegDaycounter
                 2, // settlementDays
-                USDCurrency(),
                 UnitedStates(UnitedStates::GovernmentBond),
                 6*Months, // fixedLegTenor
                 ModifiedFollowing, // fixedLegConvention
-                Thirty360(Thirty360::BondBasis), // fixedLegDaycounter
                 boost::shared_ptr<IborIndex>(new USDLibor(3*Months, h))) {}
 
     UsdLiborSwapIsdaFixAm::UsdLiborSwapIsdaFixAm(
                                 const Period& tenor,
                                 const Handle<YieldTermStructure>& forwarding,
                                 const Handle<YieldTermStructure>& discounting)
-    : SwapIndex("UsdLiborSwapIsdaFixAm", // familyName
+    : SwapIndex(USDCurrency(),
+                "UsdLiborSwapIsdaFixAm", // familyName
                 tenor,
+                Thirty360(Thirty360::BondBasis), // fixedLegDaycounter
                 2, // settlementDays
-                USDCurrency(),
                 UnitedStates(UnitedStates::GovernmentBond),
                 6*Months, // fixedLegTenor
                 ModifiedFollowing, // fixedLegConvention
-                Thirty360(Thirty360::BondBasis), // fixedLegDaycounter
                 boost::shared_ptr<IborIndex>(new USDLibor(3*Months, forwarding)),
                 discounting) {}
 
     UsdLiborSwapIsdaFixPm::UsdLiborSwapIsdaFixPm(
                                 const Period& tenor,
                                 const Handle<YieldTermStructure>& h)
-    : SwapIndex("UsdLiborSwapIsdaFixPm", // familyName
+    : SwapIndex(USDCurrency(),
+                "UsdLiborSwapIsdaFixPm", // familyName
                 tenor,
+                Thirty360(Thirty360::BondBasis), // fixedLegDaycounter
                 2, // settlementDays
-                USDCurrency(),
                 UnitedStates(UnitedStates::GovernmentBond),
                 6*Months, // fixedLegTenor
                 ModifiedFollowing, // fixedLegConvention
-                Thirty360(Thirty360::BondBasis), // fixedLegDaycounter
                 boost::shared_ptr<IborIndex>(new USDLibor(3*Months, h))) {}
 
     UsdLiborSwapIsdaFixPm::UsdLiborSwapIsdaFixPm(
                                 const Period& tenor,
                                 const Handle<YieldTermStructure>& forwarding,
                                 const Handle<YieldTermStructure>& discounting)
-    : SwapIndex("UsdLiborSwapIsdaFixPm", // familyName
+    : SwapIndex(USDCurrency(),
+                "UsdLiborSwapIsdaFixPm", // familyName
                 tenor,
+                Thirty360(Thirty360::BondBasis), // fixedLegDaycounter
                 2, // settlementDays
-                USDCurrency(),
                 UnitedStates(UnitedStates::GovernmentBond),
                 6*Months, // fixedLegTenor
                 ModifiedFollowing, // fixedLegConvention
-                Thirty360(Thirty360::BondBasis), // fixedLegDaycounter
                 boost::shared_ptr<IborIndex>(new USDLibor(3*Months, forwarding)),
                 discounting) {}
 

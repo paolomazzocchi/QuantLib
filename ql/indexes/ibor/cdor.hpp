@@ -45,9 +45,8 @@ namespace QuantLib {
         Cdor(const Period& tenor,
              const Handle<YieldTermStructure>& h =
                                     Handle<YieldTermStructure>())
-        : IborIndex("CDOR", tenor, 2, CADCurrency(),
-                    Canada(), ModifiedFollowing, false,
-                    Actual360(), h) {}
+        : IborIndex(CADCurrency(), "CDOR", tenor, Actual360(), 2, Canada(),
+                    ModifiedFollowing, false, h) {}
     };
 
 }

@@ -1,6 +1,7 @@
 /*
  Copyright (C) 2006, 2009 Ferdinando Ametrano
  Copyright (C) 2006, 2007, 2009 StatPro Italia srl
+ Copyright (C) 2015 Paolo Mazzocchi
 
  This file is part of QuantLib, a free-software/open-source library
  for financial quantitative analysts and developers - http://quantlib.org/
@@ -39,6 +40,7 @@ namespace QuantLib {
     //! base class for swap-rate indexes
     class SwapIndex : public InterestRateIndex {
       public:
+QL_DEPRECATED
         SwapIndex(const std::string& familyName,
                   const Period& tenor,
                   Natural settlementDays,
@@ -48,6 +50,16 @@ namespace QuantLib {
                   BusinessDayConvention fixedLegConvention,
                   const DayCounter& fixedLegDayCounter,
                   const boost::shared_ptr<IborIndex>& iborIndex);
+        SwapIndex(Currency currency,
+                  const std::string& familyName,
+                  const Period& tenor,
+                  const DayCounter& fixedLegDayCounter,
+                  Natural settlementDays,
+                  const Calendar& fixingCalendar,
+                  const Period& fixedLegTenor,
+                  BusinessDayConvention fixedLegConvention,
+                  const boost::shared_ptr<IborIndex>& iborIndex);
+QL_DEPRECATED
         SwapIndex(const std::string& familyName,
                   const Period& tenor,
                   Natural settlementDays,
@@ -56,6 +68,16 @@ namespace QuantLib {
                   const Period& fixedLegTenor,
                   BusinessDayConvention fixedLegConvention,
                   const DayCounter& fixedLegDayCounter,
+                  const boost::shared_ptr<IborIndex>& iborIndex,
+                  const Handle<YieldTermStructure>& discountingTermStructure);
+        SwapIndex(Currency currency, 
+                  const std::string& familyName,
+                  const Period& tenor, 
+                  const DayCounter& fixedLegDayCounter,
+                  Natural settlementDays,
+                  const Calendar& fixingCalendar,
+                  const Period& fixedLegTenor,
+                  BusinessDayConvention fixedLegConvention,
                   const boost::shared_ptr<IborIndex>& iborIndex,
                   const Handle<YieldTermStructure>& discountingTermStructure);
         //! \name InterestRateIndex interface
@@ -107,12 +129,19 @@ namespace QuantLib {
     //! base class for overnight indexed swap indexes
     class OvernightIndexedSwapIndex : public SwapIndex {
       public:
+QL_DEPRECATED
         OvernightIndexedSwapIndex(
                   const std::string& familyName,
                   const Period& tenor,
                   Natural settlementDays,
                   Currency currency,
                   const boost::shared_ptr<OvernightIndex>& overnightIndex);
+        OvernightIndexedSwapIndex(
+                    Currency currency,
+                    const std::string& familyName,
+                    const Period& tenor,
+                    Natural settlementDays,
+                    const boost::shared_ptr<OvernightIndex>& overnightIndex);
         //! \name Inspectors
         //@{
         boost::shared_ptr<OvernightIndex> overnightIndex() const;

@@ -279,14 +279,14 @@ void CmsTest::testFairRate()  {
 
     CommonVars vars;
 
-    shared_ptr<SwapIndex> swapIndex(new SwapIndex("EuriborSwapIsdaFixA",
+    shared_ptr<SwapIndex> swapIndex(new SwapIndex(vars.iborIndex->currency(),
+                                                  "EuriborSwapIsdaFixA",
                                                   10*Years,
+                                                  vars.iborIndex->dayCounter(),//??
                                                   vars.iborIndex->fixingDays(),
-                                                  vars.iborIndex->currency(),
                                                   vars.iborIndex->fixingCalendar(),
                                                   1*Years,
                                                   Unadjusted,
-                                                  vars.iborIndex->dayCounter(),//??
                                                   vars.iborIndex));
     // FIXME
     //shared_ptr<SwapIndex> swapIndex(new
@@ -343,14 +343,14 @@ void CmsTest::testCmsSwap() {
 
     CommonVars vars;
 
-    shared_ptr<SwapIndex> swapIndex(new SwapIndex("EuriborSwapIsdaFixA",
+    shared_ptr<SwapIndex> swapIndex(new SwapIndex(vars.iborIndex->currency(),
+                                                  "EuriborSwapIsdaFixA",
                                                   10*Years,
+                                                  vars.iborIndex->dayCounter(),//??
                                                   vars.iborIndex->fixingDays(),
-                                                  vars.iborIndex->currency(),
                                                   vars.iborIndex->fixingCalendar(),
                                                   1*Years,
                                                   Unadjusted,
-                                                  vars.iborIndex->dayCounter(),//??
                                                   vars.iborIndex));
     // FIXME
     //shared_ptr<SwapIndex> swapIndex(new

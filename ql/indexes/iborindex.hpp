@@ -4,6 +4,7 @@
  Copyright (C) 2000, 2001, 2002, 2003 RiskMap srl
  Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009 StatPro Italia srl
  Copyright (C) 2009 Ferdinando Ametrano
+ Copyright (C) 2015 Paolo Mazzocchi
 
  This file is part of QuantLib, a free-software/open-source library
  for financial quantitative analysts and developers - http://quantlib.org/
@@ -34,6 +35,7 @@ namespace QuantLib {
     //! base class for Inter-Bank-Offered-Rate indexes (e.g. %Libor, etc.)
     class IborIndex : public InterestRateIndex {
       public:
+QL_DEPRECATED
         IborIndex(const std::string& familyName,
                   const Period& tenor,
                   Natural settlementDays,
@@ -42,6 +44,16 @@ namespace QuantLib {
                   BusinessDayConvention convention,
                   bool endOfMonth,
                   const DayCounter& dayCounter,
+                  const Handle<YieldTermStructure>& h =
+                                    Handle<YieldTermStructure>());
+        IborIndex(const Currency& currency,
+                  const std::string& familyName,
+                  const Period& tenor,
+                  const DayCounter& dayCounter,
+                  Natural settlementDays,
+                  const Calendar& fixingCalendar,
+                  BusinessDayConvention convention,
+                  bool endOfMonth,
                   const Handle<YieldTermStructure>& h =
                                     Handle<YieldTermStructure>());
         //! \name InterestRateIndex interface
@@ -88,6 +100,7 @@ namespace QuantLib {
 
     class OvernightIndex : public IborIndex {
       public:
+QL_DEPRECATED
         OvernightIndex(const std::string& familyName,
                        Natural settlementDays,
                        const Currency& currency,
@@ -95,11 +108,17 @@ namespace QuantLib {
                        const DayCounter& dayCounter,
                        const Handle<YieldTermStructure>& h =
                                     Handle<YieldTermStructure>());
+        OvernightIndex(const Currency& currency,
+                       const std::string& familyName,
+                       const DayCounter& dayCounter,
+                       Natural settlementDays,
+                       const Calendar& fixingCalendar,
+                       const Handle<YieldTermStructure>& h =
+                                     Handle<YieldTermStructure>());
         //! returns a copy of itself linked to a different forwarding curve
         boost::shared_ptr<IborIndex> clone(
                                    const Handle<YieldTermStructure>& h) const;
     };
-
 
     // inline
 

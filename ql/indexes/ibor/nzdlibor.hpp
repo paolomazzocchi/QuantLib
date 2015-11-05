@@ -42,11 +42,12 @@ namespace QuantLib {
         NZDLibor(const Period& tenor,
                  const Handle<YieldTermStructure>& h =
                                     Handle<YieldTermStructure>())
-        : Libor("NZDLibor", tenor,
+        : Libor(NZDCurrency(), 
+                tenor, 
+                Actual360(),
                 2,
-                NZDCurrency(),
                 NewZealand(),
-                Actual360(), h) {}
+                h) {}
     };
 
 }

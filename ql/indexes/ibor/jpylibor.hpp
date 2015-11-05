@@ -36,7 +36,7 @@ namespace QuantLib {
     //! %JPY %LIBOR rate
     /*! Japanese Yen LIBOR fixed by BBA.
 
-        See <http://www.bba.org.uk/bba/jsp/polopoly.jsp?d=225&a=1414>.
+        See <https://www.theice.com/iba/libor>.
 
         \warning This is the rate fixed in London by BBA. Use TIBOR if
                  you're interested in the Tokio fixing.
@@ -46,11 +46,7 @@ namespace QuantLib {
         JPYLibor(const Period& tenor,
                  const Handle<YieldTermStructure>& h =
                                     Handle<YieldTermStructure>())
-        : Libor("JPYLibor", tenor,
-                2,
-                JPYCurrency(),
-                Japan(),
-                Actual360(), h) {}
+        : Libor(JPYCurrency(), tenor, Actual360(), 2, Japan(), h) {}
     };
 
     //! base class for the one day deposit BBA %JPY %LIBOR indexes
@@ -59,10 +55,8 @@ namespace QuantLib {
         DailyTenorJPYLibor(Natural settlementDays,
                            const Handle<YieldTermStructure>& h =
                                     Handle<YieldTermStructure>())
-        : DailyTenorLibor("JPYLibor", settlementDays,
-                          JPYCurrency(),
-                          Japan(),
-                          Actual360(), h) {}
+        : DailyTenorLibor(JPYCurrency(), Actual360(),settlementDays, 
+                          Japan(), h) {}
     };
 
 }

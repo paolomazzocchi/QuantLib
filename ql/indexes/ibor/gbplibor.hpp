@@ -33,20 +33,17 @@
 namespace QuantLib {
 
     //! %GBP %LIBOR rate
-    /*! Pound Sterling LIBOR fixed by BBA.
+    /*! Pound Sterling LIBOR fixed by ICE.
 
-        See <http://www.bba.org.uk/bba/jsp/polopoly.jsp?d=225&a=1414>.
+        See <https://www.theice.com/iba/libor>.
     */
     class GBPLibor : public Libor {
       public:
         GBPLibor(const Period& tenor,
                  const Handle<YieldTermStructure>& h =
                                     Handle<YieldTermStructure>())
-        : Libor("GBPLibor", tenor,
-                0,
-                GBPCurrency(),
-                UnitedKingdom(UnitedKingdom::Exchange),
-                Actual365Fixed(), h) {}
+        : Libor(GBPCurrency(), tenor, Actual365Fixed(), 0, 
+                UnitedKingdom(UnitedKingdom::Exchange), h) {}
     };
 
     //! base class for the one day deposit BBA %GBP %LIBOR indexes
@@ -55,10 +52,8 @@ namespace QuantLib {
         DailyTenorGBPLibor(Natural settlementDays,
                            const Handle<YieldTermStructure>& h =
                                     Handle<YieldTermStructure>())
-        : DailyTenorLibor("GBPLibor", settlementDays,
-                          GBPCurrency(),
-                          UnitedKingdom(UnitedKingdom::Exchange),
-                          Actual365Fixed(), h) {}
+        : DailyTenorLibor(GBPCurrency(), Actual365Fixed(), settlementDays,
+                          UnitedKingdom(UnitedKingdom::Exchange), h) {}
     };
 
     //! Overnight %GBP %Libor index

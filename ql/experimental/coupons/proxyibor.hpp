@@ -31,14 +31,14 @@ namespace QuantLib {
     //! IborIndex calculated as proxy of some other IborIndex
     class ProxyIbor : public IborIndex {
       public:
-        ProxyIbor(const std::string& familyName,
+        ProxyIbor(const Currency& currency,
+                  const std::string& familyName,
                   const Period& tenor,
+                  const DayCounter& dayCounter,
                   Natural settlementDays,
-                  const Currency& currency,
                   const Calendar& fixingCalendar,
                   BusinessDayConvention convention,
                   bool endOfMonth,
-                  const DayCounter& dayCounter,
                   const Handle<Quote>& gearing,
                   const boost::shared_ptr<IborIndex>& iborIndex,
                   const Handle<Quote>& spread);

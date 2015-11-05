@@ -248,9 +248,9 @@ void SwapTest::testInArrears() {
                       DateGeneration::Forward,false);
     DayCounter dayCounter = SimpleDayCounter();
     std::vector<Real> nominals(1, 100000000.0);
-    boost::shared_ptr<IborIndex> index(new IborIndex("dummy", 1*Years, 0,
-                                             EURCurrency(), calendar,
-                                             Following, false, dayCounter,
+    boost::shared_ptr<IborIndex> index(new IborIndex(EURCurrency(),"dummy", 
+                                             1*Years, dayCounter, 0, calendar,
+                                             Following, false, 
                                              vars.termStructure));
     Rate oneYear = 0.05;
     Rate r = std::log(1.0+oneYear);

@@ -42,9 +42,8 @@ namespace QuantLib {
         Jibar(const Period& tenor,
               const Handle<YieldTermStructure>& h =
                                     Handle<YieldTermStructure>())
-        : IborIndex("Jibar", tenor, 0, ZARCurrency(),
-                SouthAfrica(), ModifiedFollowing, false,
-                Actual365Fixed(), h) {}
+        : IborIndex(ZARCurrency(), "Jibar", tenor, Actual365Fixed(), 0,
+                    SouthAfrica(), ModifiedFollowing, false, h) {}
     };
 
 }

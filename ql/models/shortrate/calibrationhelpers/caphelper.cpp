@@ -89,14 +89,14 @@ namespace QuantLib {
             maturity = termStructure_->referenceDate() + length_;
         }
         boost::shared_ptr<IborIndex> dummyIndex(new
-            IborIndex("dummy",
+            IborIndex(index_->currency(),
+                      "dummy",
                       indexTenor,
+                      termStructure_->dayCounter(),
                       index_->fixingDays(),
-                      index_->currency(),
                       index_->fixingCalendar(),
                       index_->businessDayConvention(),
                       index_->endOfMonth(),
-                      termStructure_->dayCounter(),
                       termStructure_));
 
         std::vector<Real> nominals(1,1.0);

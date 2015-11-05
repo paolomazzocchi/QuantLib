@@ -25,6 +25,6 @@
 namespace QuantLib {
 
     Eonia::Eonia(const Handle<YieldTermStructure>& h)
-    : OvernightIndex("Eonia", 0, EURCurrency(), TARGET(), Actual360(), h) {}
+    : OvernightIndex(EURCurrency(),"Eonia", Actual360(), 0, TARGET(), h) {}
 
 }

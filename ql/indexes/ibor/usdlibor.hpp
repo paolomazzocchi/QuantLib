@@ -33,20 +33,17 @@
 namespace QuantLib {
 
     //! %USD %LIBOR rate
-    /*! US Dollar LIBOR fixed by BBA.
+    /*! US Dollar LIBOR fixed by ICE.
 
-        See <http://www.bba.org.uk/bba/jsp/polopoly.jsp?d=225&a=1414>.
+        See <https://www.theice.com/iba/libor>.
     */
     class USDLibor : public Libor {
       public:
         USDLibor(const Period& tenor,
                  const Handle<YieldTermStructure>& h =
                                     Handle<YieldTermStructure>())
-        : Libor("USDLibor", tenor,
-                2,
-                USDCurrency(),
-                UnitedStates(UnitedStates::Settlement),
-                Actual360(), h) {}
+        : Libor(USDCurrency(), tenor, Actual360(), 2, 
+                UnitedStates(UnitedStates::Settlement), h) {}
     };
 
     //! base class for the one day deposit BBA %USD %LIBOR indexes
@@ -55,10 +52,8 @@ namespace QuantLib {
         DailyTenorUSDLibor(Natural settlementDays,
                            const Handle<YieldTermStructure>& h =
                                     Handle<YieldTermStructure>())
-        : DailyTenorLibor("USDLibor", settlementDays,
-                          USDCurrency(),
-                          UnitedStates(UnitedStates::Settlement),
-                          Actual360(), h) {}
+        : DailyTenorLibor(USDCurrency(), Actual360(), settlementDays,
+                          UnitedStates(UnitedStates::Settlement), h) {}
     };
 
     //! Overnight %USD %Libor index

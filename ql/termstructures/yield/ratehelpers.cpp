@@ -301,10 +301,9 @@ namespace QuantLib {
                                          const DayCounter& dayCounter)
     : RelativeDateRateHelper(rate) {
         iborIndex_ = shared_ptr<IborIndex>(new
-            IborIndex("no-fix", // never take fixing into account
-                      tenor, fixingDays,
-                      Currency(), calendar, convention,
-                      endOfMonth, dayCounter, termStructureHandle_));
+            IborIndex(Currency(), "no-fix", // never take fixing into account
+                      tenor, dayCounter, fixingDays, calendar, convention, 
+                      endOfMonth, termStructureHandle_));
         initializeDates();
     }
 
@@ -317,10 +316,9 @@ namespace QuantLib {
                                          const DayCounter& dayCounter)
     : RelativeDateRateHelper(rate) {
         iborIndex_ = shared_ptr<IborIndex>(new
-            IborIndex("no-fix", // never take fixing into account
-                      tenor, fixingDays,
-                      Currency(), calendar, convention,
-                      endOfMonth, dayCounter, termStructureHandle_));
+            IborIndex(Currency(),"no-fix", // never take fixing into account
+                      tenor, dayCounter, fixingDays, calendar, convention,
+                      endOfMonth, termStructureHandle_));
         initializeDates();
     }
 
@@ -396,11 +394,10 @@ namespace QuantLib {
         // no way to take fixing into account,
         // even if we would like to for FRA over today
         iborIndex_ = shared_ptr<IborIndex>(new
-            IborIndex("no-fix", // correct family name would be needed
-                      (monthsToEnd-monthsToStart)*Months,
-                      fixingDays,
-                      Currency(), calendar, convention,
-                      endOfMonth, dayCounter, termStructureHandle_));
+            IborIndex(Currency(), "no-fix", // correct family name would be needed
+                      (monthsToEnd-monthsToStart)*Months, dayCounter, 
+                      fixingDays, calendar, convention,
+                      endOfMonth, termStructureHandle_));
         pillarDate_ = customPillarDate;
         initializeDates();
     }
@@ -424,11 +421,10 @@ namespace QuantLib {
         // no way to take fixing into account,
         // even if we would like to for FRA over today
         iborIndex_ = shared_ptr<IborIndex>(new
-            IborIndex("no-fix", // correct family name would be needed
-                      (monthsToEnd-monthsToStart)*Months,
-                      fixingDays,
-                      Currency(), calendar, convention,
-                      endOfMonth, dayCounter, termStructureHandle_));
+            IborIndex(Currency(), "no-fix", // correct family name would be needed
+                      (monthsToEnd-monthsToStart)*Months, dayCounter,
+                      fixingDays, calendar, convention,
+                      endOfMonth, termStructureHandle_));
         pillarDate_ = customPillarDate;
         initializeDates();
     }
@@ -482,11 +478,10 @@ namespace QuantLib {
         // no way to take fixing into account,
         // even if we would like to for FRA over today
         iborIndex_ = shared_ptr<IborIndex>(new
-            IborIndex("no-fix", // correct family name would be needed
-                      lengthInMonths*Months,
-                      fixingDays,
-                      Currency(), calendar, convention,
-                      endOfMonth, dayCounter, termStructureHandle_));
+            IborIndex(Currency(), "no-fix", // correct family name would be needed
+                      lengthInMonths*Months, dayCounter,
+                      fixingDays, calendar, convention,
+                      endOfMonth, termStructureHandle_));
         pillarDate_ = customPillarDate;
         initializeDates();
     }
@@ -506,11 +501,10 @@ namespace QuantLib {
         // no way to take fixing into account,
         // even if we would like to for FRA over today
         iborIndex_ = shared_ptr<IborIndex>(new
-            IborIndex("no-fix", // correct family name would be needed
-                      lengthInMonths*Months,
-                      fixingDays,
-                      Currency(), calendar, convention,
-                      endOfMonth, dayCounter, termStructureHandle_));
+            IborIndex(Currency(), "no-fix", // correct family name would be needed
+                      lengthInMonths*Months, dayCounter,
+                      fixingDays, calendar, convention,
+                      endOfMonth,termStructureHandle_));
         pillarDate_ = customPillarDate;
         initializeDates();
     }

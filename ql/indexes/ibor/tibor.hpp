@@ -44,9 +44,8 @@ namespace QuantLib {
         Tibor(const Period& tenor,
               const Handle<YieldTermStructure>& h =
                                     Handle<YieldTermStructure>())
-        : IborIndex("Tibor", tenor, 2, JPYCurrency(),
-                    Japan(), ModifiedFollowing,
-                    false, Actual365Fixed(), h) {}
+        : IborIndex(JPYCurrency(), "Tibor", tenor, Actual365Fixed(), 2, 
+                    Japan(), ModifiedFollowing, false, h) {}
     };
 
 }

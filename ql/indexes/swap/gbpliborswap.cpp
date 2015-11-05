@@ -31,15 +31,15 @@ namespace QuantLib {
     GbpLiborSwapIsdaFix::GbpLiborSwapIsdaFix(
                             const Period& tenor,
                             const Handle<YieldTermStructure>& h)
-    : SwapIndex("GbpLiborSwapIsdaFix", // familyName
+    : SwapIndex(GBPCurrency(),
+                "GbpLiborSwapIsdaFix", // familyName
                 tenor,
+                Actual365Fixed(), // fixedLegDaycounter
                 0, // settlementDays
-                GBPCurrency(),
                 UnitedKingdom(UnitedKingdom::Exchange),
                 tenor > 1*Years ? // fixedLegTenor
                     6*Months : 1*Years,
                 ModifiedFollowing, // fixedLegConvention
-                Actual365Fixed(), // fixedLegDaycounter
                 tenor > 1*Years ?
                     shared_ptr<IborIndex>(new GBPLibor(6*Months, h)) :
                     shared_ptr<IborIndex>(new GBPLibor(3*Months, h))) {}
@@ -48,15 +48,15 @@ namespace QuantLib {
                             const Period& tenor,
                             const Handle<YieldTermStructure>& forwarding,
                             const Handle<YieldTermStructure>& discounting)
-    : SwapIndex("GbpLiborSwapIsdaFix", // familyName
+    : SwapIndex(GBPCurrency(),
+                "GbpLiborSwapIsdaFix", // familyName
                 tenor,
+                Actual365Fixed(), // fixedLegDaycounter
                 0, // settlementDays
-                GBPCurrency(),
                 UnitedKingdom(UnitedKingdom::Exchange),
                 tenor > 1*Years ? // fixedLegTenor
                     6*Months : 1*Years,
                 ModifiedFollowing, // fixedLegConvention
-                Actual365Fixed(), // fixedLegDaycounter
                 tenor > 1*Years ?
                     shared_ptr<IborIndex>(new GBPLibor(6*Months, forwarding)) :
                     shared_ptr<IborIndex>(new GBPLibor(3*Months, forwarding)),

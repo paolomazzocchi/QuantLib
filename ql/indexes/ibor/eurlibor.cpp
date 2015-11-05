@@ -59,17 +59,14 @@ namespace QuantLib {
 
     EURLibor::EURLibor(const Period& tenor,
                        const Handle<YieldTermStructure>& h)
-    : IborIndex("EURLibor", tenor,
-                2,
-                EURCurrency(),
+    : IborIndex(EURCurrency(), "Libor", tenor, Actual360(), 2,
                 // http://www.bba.org.uk/bba/jsp/polopoly.jsp?d=225&a=1412 :
                 // JoinBusinessDays is the fixing calendar for
                 // all indexes but o/n
                 JointCalendar(UnitedKingdom(UnitedKingdom::Exchange),
                               TARGET(),
                               JoinBusinessDays),
-                eurliborConvention(tenor), eurliborEOM(tenor),
-                Actual360(), h),
+                eurliborConvention(tenor), eurliborEOM(tenor), h),
       target_(TARGET()) {
         QL_REQUIRE(this->tenor().units()!=Days,
                    "for daily tenors (" << this->tenor() <<
@@ -96,15 +93,11 @@ namespace QuantLib {
 
     DailyTenorEURLibor::DailyTenorEURLibor(Natural settlementDays,
                                            const Handle<YieldTermStructure>& h)
-    : IborIndex("EURLibor", 1*Days,
-                settlementDays,
-                EURCurrency(),
+    : IborIndex(EURCurrency(), "Libor", 1*Days, Actual360(), settlementDays,
                 // http://www.bba.org.uk/bba/jsp/polopoly.jsp?d=225&a=1412 :
                 // no o/n or s/n fixings (as the case may be) will take place
                 // when the principal centre of the currency concerned is
                 // closed but London is open on the fixing day.
-                TARGET(),
-                eurliborConvention(1*Days), eurliborEOM(1*Days),
-                Actual360(), h) {}
-
+                TARGET(), eurliborConvention(1*Days), eurliborEOM(1*Days), 
+                h) {}
 }

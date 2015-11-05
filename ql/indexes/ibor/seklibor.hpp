@@ -43,11 +43,12 @@ namespace QuantLib {
         SEKLibor(const Period& tenor,
                  const Handle<YieldTermStructure>& h =
                                     Handle<YieldTermStructure>())
-        : Libor("SEKLibor", tenor,
+        : Libor(SEKCurrency(), 
+                tenor, 
+                Actual360(),
                 2,
-                SEKCurrency(),
                 Sweden(),
-                Actual360(), h) {}
+                h) {}
     };
 
 }

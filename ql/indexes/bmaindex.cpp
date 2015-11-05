@@ -41,12 +41,12 @@ namespace QuantLib {
     }
 
     BMAIndex::BMAIndex(const Handle<YieldTermStructure>& h)
-    : InterestRateIndex("BMA",
+    : InterestRateIndex(USDCurrency(),
+                        "BMA",
                         1 * Weeks,
+                        ActualActual(ActualActual::ISDA),
                         1,
-                        USDCurrency(),
-                        UnitedStates(UnitedStates::NYSE),
-                        ActualActual(ActualActual::ISDA)),
+                        UnitedStates(UnitedStates::NYSE)),
       termStructure_(h) {
         registerWith (h);
     }

@@ -31,14 +31,14 @@ namespace QuantLib {
     EuriborSwapIsdaFixA::EuriborSwapIsdaFixA(
                                         const Period& tenor,
                                         const Handle<YieldTermStructure>& h)
-    : SwapIndex("EuriborSwapIsdaFixA", // familyName
+    : SwapIndex(EURCurrency(),
+                "EuriborSwapIsdaFixA", // familyName
                 tenor,
+                Thirty360(Thirty360::BondBasis), // fixedLegDaycounter
                 2, // settlementDays
-                EURCurrency(),
                 TARGET(),
                 1*Years, // fixedLegTenor
                 ModifiedFollowing, // fixedLegConvention
-                Thirty360(Thirty360::BondBasis), // fixedLegDaycounter
                 tenor > 1*Years ?
                     shared_ptr<IborIndex>(new Euribor(6*Months, h)) :
                     shared_ptr<IborIndex>(new Euribor(3*Months, h))) {}
@@ -47,14 +47,14 @@ namespace QuantLib {
                                 const Period& tenor,
                                 const Handle<YieldTermStructure>& forwarding,
                                 const Handle<YieldTermStructure>& discounting)
-    : SwapIndex("EuriborSwapIsdaFixA", // familyName
+    : SwapIndex(EURCurrency(),
+                "EuriborSwapIsdaFixA", // familyName
                 tenor,
+                Thirty360(Thirty360::BondBasis), // fixedLegDaycounter
                 2, // settlementDays
-                EURCurrency(),
                 TARGET(),
                 1*Years, // fixedLegTenor
                 ModifiedFollowing, // fixedLegConvention
-                Thirty360(Thirty360::BondBasis), // fixedLegDaycounter
                 tenor > 1*Years ?
                     shared_ptr<IborIndex>(new Euribor(6*Months, forwarding)) :
                     shared_ptr<IborIndex>(new Euribor(3*Months, forwarding)),
@@ -63,14 +63,14 @@ namespace QuantLib {
     EuriborSwapIsdaFixB::EuriborSwapIsdaFixB(
                                         const Period& tenor,
                                         const Handle<YieldTermStructure>& h)
-    : SwapIndex("EuriborSwapIsdaFixB", // familyName
+    : SwapIndex(EURCurrency(),
+                "EuriborSwapIsdaFixB", // familyName
                 tenor,
+                Thirty360(Thirty360::BondBasis), // fixedLegDaycounter
                 2, // settlementDays
-                EURCurrency(),
                 TARGET(),
                 1*Years, // fixedLegTenor
                 ModifiedFollowing, // fixedLegConvention
-                Thirty360(Thirty360::BondBasis), // fixedLegDaycounter
                 tenor > 1*Years ?
                     shared_ptr<IborIndex>(new Euribor(6*Months, h)) :
                     shared_ptr<IborIndex>(new Euribor(3*Months, h))) {}
@@ -79,14 +79,14 @@ namespace QuantLib {
                                 const Period& tenor,
                                 const Handle<YieldTermStructure>& forwarding,
                                 const Handle<YieldTermStructure>& discounting)
-    : SwapIndex("EuriborSwapIsdaFixB", // familyName
+    : SwapIndex(EURCurrency(),
+                "EuriborSwapIsdaFixB", // familyName
                 tenor,
+                Thirty360(Thirty360::BondBasis), // fixedLegDaycounter
                 2, // settlementDays
-                EURCurrency(),
                 TARGET(),
                 1*Years, // fixedLegTenor
                 ModifiedFollowing, // fixedLegConvention
-                Thirty360(Thirty360::BondBasis), // fixedLegDaycounter
                 tenor > 1*Years ?
                     shared_ptr<IborIndex>(new Euribor(6*Months, forwarding)) :
                     shared_ptr<IborIndex>(new Euribor(3*Months, forwarding)),
@@ -95,14 +95,14 @@ namespace QuantLib {
 
     EuriborSwapIfrFix::EuriborSwapIfrFix(const Period& tenor,
                                          const Handle<YieldTermStructure>& h)
-    : SwapIndex("EuriborSwapIfrFix", // familyName
+    : SwapIndex(EURCurrency(),
+                "EuriborSwapIfrFix", // familyName
                 tenor,
+                Thirty360(Thirty360::BondBasis), // fixedLegDaycounter
                 2, // settlementDays
-                EURCurrency(),
                 TARGET(),
                 1*Years, // fixedLegTenor
                 ModifiedFollowing, // fixedLegConvention
-                Thirty360(Thirty360::BondBasis), // fixedLegDaycounter
                 tenor > 1*Years ?
                     shared_ptr<IborIndex>(new Euribor(6*Months, h)) :
                     shared_ptr<IborIndex>(new Euribor(3*Months, h))) {}
@@ -111,14 +111,14 @@ namespace QuantLib {
                                 const Period& tenor,
                                 const Handle<YieldTermStructure>& forwarding,
                                 const Handle<YieldTermStructure>& discounting)
-    : SwapIndex("EuriborSwapIfrFix", // familyName
+    : SwapIndex(EURCurrency(),
+                "EuriborSwapIfrFix", // familyName
                 tenor,
+                Thirty360(Thirty360::BondBasis), // fixedLegDaycounter
                 2, // settlementDays
-                EURCurrency(),
                 TARGET(),
                 1*Years, // fixedLegTenor
                 ModifiedFollowing, // fixedLegConvention
-                Thirty360(Thirty360::BondBasis), // fixedLegDaycounter
                 tenor > 1*Years ?
                     shared_ptr<IborIndex>(new Euribor(6*Months, forwarding)) :
                     shared_ptr<IborIndex>(new Euribor(3*Months, forwarding)),

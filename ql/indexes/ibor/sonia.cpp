@@ -25,8 +25,7 @@
 namespace QuantLib {
 
     Sonia::Sonia(const Handle<YieldTermStructure>& h)
-    : OvernightIndex("Sonia", 0, GBPCurrency(),
-                     UnitedKingdom(UnitedKingdom::Exchange),
-                     Actual365Fixed(), h) {}
+    : OvernightIndex(GBPCurrency(), "Sonia", Actual365Fixed(), 0, 
+                     UnitedKingdom(UnitedKingdom::Exchange), h) {}
 
 }

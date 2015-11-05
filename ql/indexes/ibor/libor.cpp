@@ -4,6 +4,7 @@
  Copyright (C) 2007 Ferdinando Ametrano
  Copyright (C) 2007 Chiara Fornarola
  Copyright (C) 2005, 2006, 2008 StatPro Italia srl
+ Copyright (C) 2015 Paolo Mazzocchi
 
  This file is part of QuantLib, a free-software/open-source library
  for financial quantitative analysts and developers - http://quantlib.org/
@@ -64,14 +65,13 @@ namespace QuantLib {
                  const Calendar& financialCenterCalendar,
                  const DayCounter& dayCounter,
                  const Handle<YieldTermStructure>& h)
-    : IborIndex(familyName, tenor, settlementDays, currency,
-                // http://www.bba.org.uk/bba/jsp/polopoly.jsp?d=225&a=1412 :
+    : IborIndex(currency, familyName, tenor, dayCounter, settlementDays,
+                // https://www.theice.com/iba/libor :
                 // UnitedKingdom::Exchange is the fixing calendar for
                 // a) all currencies but EUR
                 // b) all indexes but o/n and s/n
                 UnitedKingdom(UnitedKingdom::Exchange),
-                liborConvention(tenor), liborEOM(tenor),
-                dayCounter, h),
+                liborConvention(tenor), liborEOM(tenor), h),
       financialCenterCalendar_(financialCenterCalendar),
       jointCalendar_(JointCalendar(UnitedKingdom(UnitedKingdom::Exchange),
                                    financialCenterCalendar,
@@ -83,17 +83,68 @@ namespace QuantLib {
                    "for EUR Libor dedicated EurLibor constructor must be used");
     }
 
+    Libor::Libor(const Currency& currency,
+        const Period& tenor,
+        const DayCounter& dayCounter,
+        Natural settlementDays,
+        const Calendar& financialCenterCalendar,
+        const Handle<YieldTermStructure>& h)
+    : IborIndex(currency,
+                // https://www.theice.com/iba/libor :
+                // UnitedKingdom::Exchange is the fixing calendar for
+                // a) all currencies but EUR (NOT TRUE ANYMORE)
+                // b) all indexes but o/n and s/n
+                "Libor", tenor, dayCounter, settlementDays,
+                UnitedKingdom(UnitedKingdom::Exchange), liborConvention(tenor),
+                liborEOM(tenor), h),
+        financialCenterCalendar_(financialCenterCalendar),
+        jointCalendar_(JointCalendar(UnitedKingdom(UnitedKingdom::Exchange),
+        financialCenterCalendar,
+        JoinHolidays)) {
+        QL_REQUIRE(this->tenor().units() != Days,
+            "for daily tenors (" << this->tenor() <<
+            ") dedicated DailyTenor constructor must be used");
+        QL_REQUIRE(currency != EURCurrency(),
+            "for EUR Libor dedicated EurLibor constructor must be used");
+    }
+
+    Libor::Libor(const Currency& currency,
+                 const Period& tenor,
+                 const DayCounter& dayCounter,
+                 Natural settlementDays,
+                 const Calendar& financialCenterCalendar,
+                 const std::string& familyName,
+                 const Handle<YieldTermStructure>& h)
+    : IborIndex(currency,
+                // https://www.theice.com/iba/libor :
+                // UnitedKingdom::Exchange is the fixing calendar for
+                // a) all currencies but EUR (NOT TRUE ANYMORE)
+                // b) all indexes but o/n and s/n
+                familyName, tenor, dayCounter, settlementDays,
+                UnitedKingdom(UnitedKingdom::Exchange), liborConvention(tenor),
+                liborEOM(tenor), h),
+        financialCenterCalendar_(financialCenterCalendar),
+        jointCalendar_(JointCalendar(UnitedKingdom(UnitedKingdom::Exchange),
+        financialCenterCalendar,
+        JoinHolidays)) {
+        QL_REQUIRE(this->tenor().units() != Days,
+            "for daily tenors (" << this->tenor() <<
+            ") dedicated DailyTenor constructor must be used");
+        QL_REQUIRE(currency != EURCurrency(),
+            "for EUR Libor dedicated EurLibor constructor must be used");
+    }
+
     Date Libor::valueDate(const Date& fixingDate) const {
 
         QL_REQUIRE(isValidFixingDate(fixingDate),
                    "Fixing date " << fixingDate << " is not valid");
 
-        // http://www.bba.org.uk/bba/jsp/polopoly.jsp?d=225&a=1412 :
-        // For all currencies other than EUR and GBP the period between
-        // Fixing Date and Value Date will be two London business days
-        // after the Fixing Date, or if that day is not both a London
-        // business day and a business day in the principal financial centre
-        // of the currency concerned, the next following day which is a
+        // https://www.theice.com/iba/libor :
+        // For all currencies other than EUR (NOT TRUE ANYMORE) and GBP the 
+        // period between Fixing Date and Value Date will be two London 
+        // business days after the Fixing Date, or if that day is not both a 
+        // London business day and a business day in the principal financial 
+        // centre of the currency concerned, the next following day which is a
         // business day in both centres shall be the Value Date.
         Date d = fixingCalendar().advance(fixingDate, fixingDays_, Days);
         return jointCalendar_.adjust(d);
@@ -118,15 +169,13 @@ namespace QuantLib {
 
     boost::shared_ptr<IborIndex> Libor::clone(
                                   const Handle<YieldTermStructure>& h) const {
-        return boost::shared_ptr<IborIndex>(new Libor(familyName(),
+        return boost::shared_ptr<IborIndex>(new Libor(currency(),
                                                       tenor(),
-                                                      fixingDays(),
-                                                      currency(),
-                                                      financialCenterCalendar_,
                                                       dayCounter(),
+                                                      fixingDays(),
+                                                      financialCenterCalendar_,
                                                       h));
     }
-
 
     DailyTenorLibor::DailyTenorLibor(
                  const std::string& familyName,
@@ -135,18 +184,57 @@ namespace QuantLib {
                  const Calendar& financialCenterCalendar,
                  const DayCounter& dayCounter,
                  const Handle<YieldTermStructure>& h)
-    : IborIndex(familyName, 1*Days, settlementDays, currency,
-                // http://www.bba.org.uk/bba/jsp/polopoly.jsp?d=225&a=1412 :
+    : IborIndex(currency, 
+                // https://www.theice.com/iba/libor :
                 // no o/n or s/n fixings (as the case may be) will take place
                 // when the principal centre of the currency concerned is
                 // closed but London is open on the fixing day.
+                familyName, 1 * Days, dayCounter, settlementDays,
                 JointCalendar(UnitedKingdom(UnitedKingdom::Exchange),
                               financialCenterCalendar,
                               JoinHolidays),
-                liborConvention(1*Days), liborEOM(1*Days),
-                dayCounter, h) {
+                liborConvention(1*Days), liborEOM(1*Days), h) {
         QL_REQUIRE(currency!=EURCurrency(),
                    "for EUR Libor dedicated EurLibor constructor must be used");
+    }
+
+    DailyTenorLibor::DailyTenorLibor(const Currency& currency,
+                                     const DayCounter& dayCounter,
+                                     Natural settlementDays,
+                                     const Calendar& financialCenterCalendar,
+                                     const Handle<YieldTermStructure>& h)
+    : IborIndex(currency, 
+                // https://www.theice.com/iba/libor :
+                // no o/n or s/n fixings (as the case may be) will take place
+                // when the principal centre of the currency concerned is
+                // closed but London is open on the fixing day.
+                "Libor", 1 * Days, dayCounter, settlementDays,
+                JointCalendar(UnitedKingdom(UnitedKingdom::Exchange),
+                              financialCenterCalendar,
+                              JoinHolidays),
+        liborConvention(1*Days), liborEOM(1*Days), h) {
+        QL_REQUIRE(currency!=EURCurrency(),
+                   "for EUR Libor dedicated EurLibor constructor must be used");
+    }
+
+    DailyTenorLibor::DailyTenorLibor(const Currency& currency,
+                                     const DayCounter& dayCounter,
+                                     Natural settlementDays,
+                                     const Calendar& financialCenterCalendar,
+                                     const std::string& familyName,
+                                     const Handle<YieldTermStructure>& h)
+    : IborIndex(currency,
+                // https://www.theice.com/iba/libor :
+                // no o/n or s/n fixings (as the case may be) will take place
+                // when the principal centre of the currency concerned is
+                // closed but London is open on the fixing day.
+                familyName, 1 * Days, dayCounter, settlementDays,
+                JointCalendar(UnitedKingdom(UnitedKingdom::Exchange),
+                financialCenterCalendar,
+                JoinHolidays),
+        liborConvention(1 * Days), liborEOM(1 * Days), h) {
+        QL_REQUIRE(currency != EURCurrency(),
+            "for EUR Libor dedicated EurLibor constructor must be used");
     }
 
 }

@@ -43,9 +43,8 @@ namespace QuantLib {
         TRLibor(const Period& tenor,
                 const Handle<YieldTermStructure>& h =
                                     Handle<YieldTermStructure>())
-        : IborIndex("TRLibor", tenor, 0, TRYCurrency(),
-                    Turkey(), ModifiedFollowing, false,
-                    Actual360(), h) {}
+        : IborIndex(TRYCurrency(), "TRLibor", tenor, Actual360(), 0, 
+                    Turkey(), ModifiedFollowing, false, h) {}
     };
 
 }

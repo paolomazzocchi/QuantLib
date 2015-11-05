@@ -89,14 +89,14 @@ namespace {
                                       ModifiedFollowing, true,
                                       Actual360()));
             }
-            boost::shared_ptr<IborIndex> index(new IborIndex("dummy",
+            boost::shared_ptr<IborIndex> index(new IborIndex(Currency(),
+                                                             "dummy",
                                                              6*Months,
+                                                             Actual360(),
                                                              settlementDays,
-                                                             Currency(),
                                                              calendar,
                                                              ModifiedFollowing,
-                                                             false,
-                                                             Actual360()));
+                                                             false));
             for (Size i=0; i<swaps; ++i) {
                 instruments[i+deposits] = boost::shared_ptr<RateHelper>(new
                     SwapRateHelper(swapData[i].rate/100,

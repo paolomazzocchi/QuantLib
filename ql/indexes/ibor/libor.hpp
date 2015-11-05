@@ -4,6 +4,7 @@
  Copyright (C) 2007 Ferdinando Ametrano
  Copyright (C) 2007 Chiara Fornarola
  Copyright (C) 2005, 2006, 2008 StatPro Italia srl
+ Copyright (C) 2015 Paolo Mazzocchi
 
  This file is part of QuantLib, a free-software/open-source library
  for financial quantitative analysts and developers - http://quantlib.org/
@@ -30,13 +31,14 @@
 
 namespace QuantLib {
 
-    //! base class for all BBA LIBOR indexes but the EUR, O/N, and S/N ones
-    /*! LIBOR fixed by BBA.
+    //! base class for all ICE LIBOR indexes but the EUR, O/N, and S/N ones
+    /*! LIBOR fixed by ICE.
 
-        See <http://www.bba.org.uk/bba/jsp/polopoly.jsp?d=225&a=1414>.
+        See <https://www.theice.com/iba/libor>.
     */
     class Libor : public IborIndex {
       public:
+QL_DEPRECATED
         Libor(const std::string& familyName,
               const Period& tenor,
               Natural settlementDays,
@@ -45,9 +47,24 @@ namespace QuantLib {
               const DayCounter& dayCounter,
               const Handle<YieldTermStructure>& h =
                                     Handle<YieldTermStructure>());
+        Libor(const Currency& currency,
+              const Period& tenor,
+              const DayCounter& dayCounter,
+              Natural settlementDays,
+              const Calendar& financialCenterCalendar,
+              const Handle<YieldTermStructure>& h =
+                                   Handle<YieldTermStructure>());
+        Libor(const Currency& currency,
+              const Period& tenor,
+              const DayCounter& dayCounter,
+              Natural settlementDays,
+              const Calendar& financialCenterCalendar,
+              const std::string& familyName = "Libor",
+              const Handle<YieldTermStructure>& h =
+                                   Handle<YieldTermStructure>());
         /*! \name Date calculations
 
-            see http://www.bba.org.uk/bba/jsp/polopoly.jsp?d=225&a=1412
+            see https://www.theice.com/iba/libor
             @{
         */
         Date valueDate(const Date& fixingDate) const;
@@ -67,13 +84,14 @@ namespace QuantLib {
         Calendar jointCalendar_;
     };
 
-    //! base class for all O/N-S/N BBA LIBOR indexes but the EUR ones
-    /*! One day deposit LIBOR fixed by BBA.
+    //! base class for all O/N-S/N ICE LIBOR indexes but the EUR ones
+    /*! One day deposit LIBOR fixed by ICE.
 
-        See <http://www.bba.org.uk/bba/jsp/polopoly.jsp?d=225&a=1414>.
+        See <https://www.theice.com/iba/libor>.
     */
     class DailyTenorLibor : public IborIndex {
       public:
+QL_DEPRECATED
         DailyTenorLibor(const std::string& familyName,
                         Natural settlementDays,
                         const Currency& currency,
@@ -81,6 +99,20 @@ namespace QuantLib {
                         const DayCounter& dayCounter,
                         const Handle<YieldTermStructure>& h =
                                     Handle<YieldTermStructure>());
+        DailyTenorLibor(const Currency& currency,
+                        const DayCounter& dayCounter,
+                        Natural settlementDays,
+                        const Calendar& financialCenterCalendar,
+                        const Handle<YieldTermStructure>& h =
+                                    Handle<YieldTermStructure>());
+        DailyTenorLibor(const Currency& currency,
+                        const DayCounter& dayCounter,
+                        Natural settlementDays,
+                        const Calendar& financialCenterCalendar,
+                        const std::string& familyName = "Libor",
+                        const Handle<YieldTermStructure>& h =
+                                    Handle<YieldTermStructure>());
+
     };
 
 }

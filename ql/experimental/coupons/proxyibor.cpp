@@ -21,19 +21,19 @@
 
 namespace QuantLib {
 
-    ProxyIbor::ProxyIbor(const std::string& familyName,
+    ProxyIbor::ProxyIbor(const Currency& currency,
+                         const std::string& familyName,
                          const Period& tenor,
+                         const DayCounter& dayCounter,
                          Natural settlementDays,
-                         const Currency& currency,
                          const Calendar& fixingCalendar,
                          BusinessDayConvention convention,
                          bool endOfMonth,
-                         const DayCounter& dayCounter,
                          const Handle<Quote>& gearing,
                          const boost::shared_ptr<IborIndex>& iborIndex,
                          const Handle<Quote>& spread)
-    : IborIndex(familyName, tenor, settlementDays, currency,
-                fixingCalendar, convention, endOfMonth, dayCounter),
+    : IborIndex(currency, familyName, tenor, dayCounter, settlementDays, 
+                fixingCalendar, convention, endOfMonth),
       gearing_(gearing), iborIndex_(iborIndex), spread_(spread) {
         registerWith(iborIndex_);
       }

@@ -42,11 +42,12 @@ namespace QuantLib {
         DKKLibor(const Period& tenor,
                  const Handle<YieldTermStructure>& h =
                                     Handle<YieldTermStructure>())
-        : Libor("DKKLibor", tenor,
+        : Libor(DKKCurrency(),
+                tenor,
+                Actual360(),
                 2,
-                DKKCurrency(),
                 Denmark(),
-                Actual360(), h) {}
+                h) {}
     };
 
 }

@@ -45,11 +45,12 @@ namespace QuantLib {
         CHFLibor(const Period& tenor,
                  const Handle<YieldTermStructure>& h =
                                     Handle<YieldTermStructure>())
-        : Libor("CHFLibor", tenor,
+        : Libor(CHFCurrency(), 
+                tenor,
+                Actual360(),
                 2,
-                CHFCurrency(),
                 Switzerland(),
-                Actual360(), h) {}
+                h) {}
     };
 
     //! base class for the one day deposit BBA %CHF %LIBOR indexes
@@ -58,10 +59,11 @@ namespace QuantLib {
         DailyTenorCHFLibor(Natural settlementDays,
                            const Handle<YieldTermStructure>& h =
                                     Handle<YieldTermStructure>())
-        : DailyTenorLibor("CHFLibor", settlementDays,
-                          CHFCurrency(),
+        : DailyTenorLibor(CHFCurrency(),
+                          Actual360(),
+                          settlementDays,
                           Switzerland(),
-                          Actual360(), h) {}
+                          h) {}
     };
 
 }

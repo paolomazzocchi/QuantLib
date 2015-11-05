@@ -30,12 +30,13 @@ namespace QuantLib {
         const boost::shared_ptr<SwapIndex> &swapIndex2, const Real gearing1,
         const Real gearing2)
         : InterestRateIndex(
-              familyName,
-              swapIndex1
+                swapIndex1->currency(),
+                familyName,
+                swapIndex1
                   ->tenor(), // does not make sense, but we have to provide one
-              swapIndex1->fixingDays(),
-              swapIndex1->currency(), swapIndex1->fixingCalendar(),
-              swapIndex1->dayCounter()),
+                swapIndex1->dayCounter(),
+                swapIndex1->fixingDays(),
+                swapIndex1->fixingCalendar()),
           swapIndex1_(swapIndex1), swapIndex2_(swapIndex2), gearing1_(gearing1),
           gearing2_(gearing2) {
 

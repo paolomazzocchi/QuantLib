@@ -225,8 +225,9 @@ void ShortRateModelTest::testCachedHullWhite2() {
                               { 5, 1, 0.1000 }};
     boost::shared_ptr<IborIndex> index(new Euribor6M(termStructure));
     boost::shared_ptr<IborIndex> index0(new IborIndex(
-        index->familyName(),index->tenor(),0,index->currency(),index->fixingCalendar(),
-        index->businessDayConvention(),index->endOfMonth(),index->dayCounter(),termStructure)); // Euribor 6m with zero fixing days
+        index->currency(),index->familyName(),index->tenor(),index->dayCounter(),0,
+        index->fixingCalendar(),index->businessDayConvention(),index->endOfMonth(),
+        termStructure)); // Euribor 6m with zero fixing days
 
     boost::shared_ptr<PricingEngine> engine(
                                          new JamshidianSwaptionEngine(model));

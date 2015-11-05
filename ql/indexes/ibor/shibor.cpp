@@ -43,8 +43,14 @@ namespace QuantLib {
 
     Shibor::Shibor(const Period& tenor,
                    const Handle<YieldTermStructure>& h)
-    : IborIndex("Shibor", tenor, (tenor == 1*Days? 0 : 1), CNYCurrency(),
-                China(China::IB), shiborConvention(tenor), false,
-                Actual360(), h) {}
+    : IborIndex(CNYCurrency(), 
+                "Shibor", 
+                tenor, 
+                Actual360(),
+                (tenor == 1*Days? 0 : 1), 
+                China(China::IB), 
+                shiborConvention(tenor), 
+                false,
+                h) {}
 
 }

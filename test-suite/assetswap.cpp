@@ -89,10 +89,11 @@ namespace {
                      new Euribor(Period(floatingFrequency), termStructure));
             Calendar calendar = iborIndex->fixingCalendar();
             swapIndex= boost::shared_ptr<SwapIndex>(
-                new SwapIndex("EuriborSwapIsdaFixA", 10*Years, swapSettlementDays,
-                              iborIndex->currency(), calendar,
+                new SwapIndex(iborIndex->currency(),"EuriborSwapIsdaFixA", 
+                              10*Years, iborIndex->dayCounter(), 
+                              swapSettlementDays, calendar, 
                               Period(fixedFrequency), fixedConvention,
-                              iborIndex->dayCounter(), iborIndex));
+                              iborIndex));
             spread = 0.0;
             nonnullspread = 0.003;
             Date today(24,April,2007);
