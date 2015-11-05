@@ -38,7 +38,7 @@ namespace QuantLib {
         tenor_.normalize();
 
         std::ostringstream out;
-        out << familyName_;
+        out << currency_ << familyName_;
         if (tenor_ == 1*Days) {
             if (fixingDays_==0)
                 out << "ON";
