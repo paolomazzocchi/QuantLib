@@ -624,12 +624,13 @@ namespace QuantLib {
                                    Date customPillarDate)
     : RelativeDateRateHelper(rate),
       settlementDays_(swapIndex->fixingDays()),
-      tenor_(swapIndex->tenor()), calendar_(swapIndex->fixingCalendar()),
+      tenor_(swapIndex->tenor()), pillarChoice_(pillarChoice),
+      calendar_(swapIndex->fixingCalendar()),
       fixedConvention_(swapIndex->fixedLegConvention()),
       fixedFrequency_(swapIndex->fixedLegTenor().frequency()),
       fixedDayCount_(swapIndex->dayCounter()),
       spread_(spread),
-      fwdStart_(fwdStart), discountHandle_(discount), pillarChoice_(pillarChoice){
+      fwdStart_(fwdStart), discountHandle_(discount) {
         // take fixing into account
         iborIndex_ = swapIndex->iborIndex()->clone(termStructureHandle_);
         // We want to be notified of changes of fixings, but we don't
@@ -660,12 +661,13 @@ namespace QuantLib {
                                    Date customPillarDate)
     : RelativeDateRateHelper(rate),
       settlementDays_(settlementDays),
-      tenor_(tenor), calendar_(calendar),
+      tenor_(tenor), pillarChoice_(pillarChoice),
+      calendar_(calendar),
       fixedConvention_(fixedConvention),
       fixedFrequency_(fixedFrequency),
       fixedDayCount_(fixedDayCount),
       spread_(spread),
-      fwdStart_(fwdStart), discountHandle_(discount), pillarChoice_(pillarChoice) {
+      fwdStart_(fwdStart), discountHandle_(discount) {
 
         if (settlementDays_==Null<Natural>())
             settlementDays_ = iborIndex->fixingDays();
@@ -694,12 +696,13 @@ namespace QuantLib {
                                    Date customPillarDate)
     : RelativeDateRateHelper(rate),
       settlementDays_(swapIndex->fixingDays()),
-      tenor_(swapIndex->tenor()), calendar_(swapIndex->fixingCalendar()),
+      tenor_(swapIndex->tenor()), pillarChoice_(pillarChoice),
+      calendar_(swapIndex->fixingCalendar()),
       fixedConvention_(swapIndex->fixedLegConvention()),
       fixedFrequency_(swapIndex->fixedLegTenor().frequency()),
       fixedDayCount_(swapIndex->dayCounter()),
       spread_(spread),
-      fwdStart_(fwdStart), discountHandle_(discount), pillarChoice_(pillarChoice) {
+      fwdStart_(fwdStart), discountHandle_(discount) {
         // take fixing into account
         iborIndex_ = swapIndex->iborIndex()->clone(termStructureHandle_);
         // We want to be notified of changes of fixings, but we don't
@@ -730,12 +733,13 @@ namespace QuantLib {
                                    Date customPillarDate)
     : RelativeDateRateHelper(rate),
       settlementDays_(settlementDays),
-      tenor_(tenor), calendar_(calendar),
+      tenor_(tenor), pillarChoice_(pillarChoice),
+      calendar_(calendar),
       fixedConvention_(fixedConvention),
       fixedFrequency_(fixedFrequency),
       fixedDayCount_(fixedDayCount),
       spread_(spread),
-      fwdStart_(fwdStart), discountHandle_(discount), pillarChoice_(pillarChoice) {
+      fwdStart_(fwdStart), discountHandle_(discount) {
 
         if (settlementDays_==Null<Natural>())
             settlementDays_ = iborIndex->fixingDays();

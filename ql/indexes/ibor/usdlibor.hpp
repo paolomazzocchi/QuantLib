@@ -35,7 +35,7 @@ namespace QuantLib {
     //! %USD %LIBOR rate
     /*! US Dollar LIBOR fixed by ICE.
 
-        See <https://www.theice.com/iba/libor>.
+        See <https://www.theice.com/marketdata/reports/170>.
     */
     class USDLibor : public Libor {
       public:
@@ -46,7 +46,7 @@ namespace QuantLib {
                 UnitedStates(UnitedStates::Settlement), h) {}
     };
 
-    //! base class for the one day deposit BBA %USD %LIBOR indexes
+    //! base class for the one day deposit ICE %USD %LIBOR indexes
     class DailyTenorUSDLibor : public DailyTenorLibor {
       public:
         DailyTenorUSDLibor(Natural settlementDays,

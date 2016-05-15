@@ -35,7 +35,7 @@ namespace QuantLib {
     //! %GBP %LIBOR rate
     /*! Pound Sterling LIBOR fixed by ICE.
 
-        See <https://www.theice.com/iba/libor>.
+        See <https://www.theice.com/marketdata/reports/170>.
     */
     class GBPLibor : public Libor {
       public:
@@ -46,7 +46,7 @@ namespace QuantLib {
                 UnitedKingdom(UnitedKingdom::Exchange), h) {}
     };
 
-    //! base class for the one day deposit BBA %GBP %LIBOR indexes
+    //! Base class for the one day deposit ICE %GBP %LIBOR indexes
     class DailyTenorGBPLibor : public DailyTenorLibor {
       public:
         DailyTenorGBPLibor(Natural settlementDays,

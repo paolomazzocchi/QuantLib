@@ -34,11 +34,11 @@
 namespace QuantLib {
 
     //! %JPY %LIBOR rate
-    /*! Japanese Yen LIBOR fixed by BBA.
+    /*! Japanese Yen LIBOR fixed by ICE.
 
-        See <https://www.theice.com/iba/libor>.
+        See <https://www.theice.com/marketdata/reports/170>.
 
-        \warning This is the rate fixed in London by BBA. Use TIBOR if
+        \warning This is the rate fixed in London by ICE. Use TIBOR if
                  you're interested in the Tokio fixing.
     */
     class JPYLibor : public Libor {
@@ -49,7 +49,7 @@ namespace QuantLib {
         : Libor(JPYCurrency(), tenor, Actual360(), 2, Japan(), h) {}
     };
 
-    //! base class for the one day deposit BBA %JPY %LIBOR indexes
+    //! base class for the one day deposit ICE %JPY %LIBOR indexes
     class DailyTenorJPYLibor : public DailyTenorLibor {
       public:
         DailyTenorJPYLibor(Natural settlementDays,
