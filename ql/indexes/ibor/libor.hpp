@@ -64,11 +64,7 @@ QL_DEPRECATED
                                    Handle<YieldTermStructure>());
         /*! \name Date calculations
 
-<<<<<<< HEAD
-            see https://www.theice.com/iba/libor
-=======
             See <https://www.theice.com/marketdata/reports/170>.
->>>>>>> bebdf492b4fbd28af3437e20f9f153e0f531ae3c
             @{
         */
         Date valueDate(const Date& fixingDate) const;
@@ -88,17 +84,10 @@ QL_DEPRECATED
         Calendar jointCalendar_;
     };
 
-<<<<<<< HEAD
-    //! base class for all O/N-S/N ICE LIBOR indexes but the EUR ones
-    /*! One day deposit LIBOR fixed by ICE.
-
-        See <https://www.theice.com/iba/libor>.
-=======
     //! base class for all O/N-S/N BBA LIBOR indexes but the EUR ones
     /*! One day deposit LIBOR fixed by ICE.
 
         See <https://www.theice.com/marketdata/reports/170>.
->>>>>>> bebdf492b4fbd28af3437e20f9f153e0f531ae3c
     */
     class DailyTenorLibor : public IborIndex {
       public:
