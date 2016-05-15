@@ -2,6 +2,7 @@
 
 /*
  Copyright (C) 2003 RiskMap srl
+ Copyright (C) 2015 Peter Caspers
 
  This file is part of QuantLib, a free-software/open-source library
  for financial quantitative analysts and developers - http://quantlib.org/
@@ -31,10 +32,16 @@
 #include <ql/math/distributions/normaldistribution.hpp>
 #include <ql/termstructures/volatility/abcd.hpp>
 #include <ql/math/integrals/twodimensionalintegral.hpp>
+#include <ql/experimental/math/piecewisefunction.hpp>
+#include <ql/experimental/math/piecewiseintegral.hpp>
+
+#include <boost/make_shared.hpp>
 #include <boost/lambda/lambda.hpp>
+#include <boost/assign/std/vector.hpp>
 
 using namespace QuantLib;
-using namespace boost::unit_test_framework;
+using namespace boost::assign;
+using boost::unit_test_framework::test_suite;
 
 namespace {
 
@@ -74,39 +81,52 @@ namespace {
                    AbcdFunction(0.07, 0.07, 0.5, 0.1).covariance(5.0, 6.0, 8.0, 10.0));
     }
 
+    template <class T>
+    void testDegeneratedDomain(const T& I) {
+        testSingle(I, "f(x) = 0 over [1, 1 + macheps]",
+                   constant<Real, Real>(0.0), 1.0, 1.0 + QL_EPSILON, 0.0);
+    }
+
 }
 
 
 void IntegralTest::testSegment() {
     BOOST_TEST_MESSAGE("Testing segment integration...");
     testSeveral(SegmentIntegral(10000));
+    testDegeneratedDomain(SegmentIntegral(10000));
 }
 
 void IntegralTest::testTrapezoid() {
     BOOST_TEST_MESSAGE("Testing trapezoid integration...");
     testSeveral(TrapezoidIntegral<Default>(tolerance, 10000));
+    testDegeneratedDomain(TrapezoidIntegral<Default>(tolerance, 10000));
 }
 
 void IntegralTest::testMidPointTrapezoid() {
     BOOST_TEST_MESSAGE("Testing mid-point trapezoid integration...");
     testSeveral(TrapezoidIntegral<MidPoint>(tolerance, 10000));
+    testDegeneratedDomain(TrapezoidIntegral<MidPoint>(tolerance, 10000));
 }
 
 void IntegralTest::testSimpson() {
     BOOST_TEST_MESSAGE("Testing Simpson integration...");
     testSeveral(SimpsonIntegral(tolerance, 10000));
+    testDegeneratedDomain(SimpsonIntegral(tolerance, 10000));
 }
 
 void IntegralTest::testGaussKronrodAdaptive() {
     BOOST_TEST_MESSAGE("Testing adaptive Gauss-Kronrod integration...");
     Size maxEvaluations = 1000;
     testSeveral(GaussKronrodAdaptive(tolerance, maxEvaluations));
+    testDegeneratedDomain(GaussKronrodAdaptive(tolerance, maxEvaluations));
 }
 
 void IntegralTest::testGaussLobatto() {
     BOOST_TEST_MESSAGE("Testing adaptive Gauss-Lobatto integration...");
     Size maxEvaluations = 1000;
     testSeveral(GaussLobattoIntegral(maxEvaluations, tolerance));
+    // on degenerated domain [1,1+macheps] an exception is thrown
+    // which is also ok, but not tested here
 }
 
 void IntegralTest::testGaussKronrodNonAdaptive() {
@@ -117,6 +137,7 @@ void IntegralTest::testGaussKronrodNonAdaptive() {
     GaussKronrodNonAdaptive gaussKronrodNonAdaptive(precision, maxEvaluations,
                                                     relativeAccuracy);
     testSeveral(gaussKronrodNonAdaptive);
+    testDegeneratedDomain(gaussKronrodNonAdaptive);
 }
 
 void IntegralTest::testTwoDimensionalIntegration() {
@@ -246,6 +267,48 @@ void IntegralTest::testDiscreteIntegrals() {
     }
 }
 
+namespace {
+
+std::vector<Real> x, y;
+
+Real pw_fct(const Real t) { return QL_PIECEWISE_FUNCTION(x, y, t); }
+
+void pw_check(const Integrator &in, const Real a, const Real b,
+              const Real expected) {
+    Real calculated = in(pw_fct, a, b);
+    if (!close(calculated, expected))
+        BOOST_FAIL(std::setprecision(16)
+                   << "piecewise integration over [" << a << "," << b
+                   << "] failed: "
+                   << "\n   calculated: " << calculated
+                   << "\n   expected:   " << expected
+                   << "\n   difference: " << (calculated - expected));
+}
+} // empty namespace
+
+void IntegralTest::testPiecewiseIntegral() {
+    BOOST_TEST_MESSAGE("Testing piecewise integral...");
+    x += 1.0, 2.0, 3.0, 4.0, 5.0;
+    y += 1.0, 2.0, 3.0, 4.0, 5.0, 6.0;
+    boost::shared_ptr<Integrator> segment =
+        boost::make_shared<SegmentIntegral>(1);
+    boost::shared_ptr<Integrator> piecewise =
+        boost::make_shared<PiecewiseIntegral>(segment, x);
+    pw_check(*piecewise, -1.0, 0.0, 1.0);
+    pw_check(*piecewise, 0.0, 1.0, 1.0);
+    pw_check(*piecewise, 0.0, 1.5, 2.0);
+    pw_check(*piecewise, 0.0, 2.0, 3.0);
+    pw_check(*piecewise, 0.0, 2.5, 4.5);
+    pw_check(*piecewise, 0.0, 3.0, 6.0);
+    pw_check(*piecewise, 0.0, 4.0, 10.0);
+    pw_check(*piecewise, 0.0, 5.0, 15.0);
+    pw_check(*piecewise, 0.0, 6.0, 21.0);
+    pw_check(*piecewise, 0.0, 7.0, 27.0);
+    pw_check(*piecewise, 3.5, 4.5, 4.5);
+    pw_check(*piecewise, 5.0, 10.0, 30.0);
+    pw_check(*piecewise, 9.0, 10.0, 6.0);
+}
+
 test_suite* IntegralTest::suite() {
     test_suite* suite = BOOST_TEST_SUITE("Integration tests");
     suite->add(QUANTLIB_TEST_CASE(&IntegralTest::testSegment));
@@ -258,6 +321,7 @@ test_suite* IntegralTest::suite() {
     suite->add(QUANTLIB_TEST_CASE(&IntegralTest::testTwoDimensionalIntegration));
     suite->add(QUANTLIB_TEST_CASE(&IntegralTest::testFolinIntegration));
     suite->add(QUANTLIB_TEST_CASE(&IntegralTest::testDiscreteIntegrals));
+    suite->add(QUANTLIB_TEST_CASE(&IntegralTest::testPiecewiseIntegral));
     return suite;
 }
 
