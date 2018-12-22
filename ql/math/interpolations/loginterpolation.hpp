@@ -224,6 +224,29 @@ namespace QuantLib {
                                      rightC, rightConditionValue)));
             impl_->update();
         }
+
+        /*! \pre the \f$ x \f$ values must be sorted.
+        \deprecated Use the other constructo
+        */
+        //QL_DEPRECATED
+        template <class I1, class I2>
+        LogMixedLinearCubicInterpolation(const I1& xBegin, const I1& xEnd,
+                                         const I2& yBegin, const Size n,
+                                         CubicInterpolation::DerivativeApprox da,
+                                         bool monotonic,
+                                         CubicInterpolation::BoundaryCondition leftC,
+                                         Real leftConditionValue,
+                                         CubicInterpolation::BoundaryCondition rightC,
+                                         Real rightConditionValue) {
+            impl_ = boost::shared_ptr<Interpolation::Impl>(new
+                detail::LogInterpolationImpl<I1, I2, MixedLinearCubic>(
+                    xBegin, xEnd, yBegin,
+                    MixedLinearCubic(n, MixedInterpolation::ShareRanges, da, 
+                        monotonic,
+                        leftC, leftConditionValue,
+                        rightC, rightConditionValue)));
+            impl_->update();
+        }
     };
 
     //! log-cubic interpolation factory and traits
@@ -241,6 +264,19 @@ namespace QuantLib {
                                 = CubicInterpolation::SecondDerivative,
                             Real rightConditionValue = 0.0)
         : n_(n), behavior_(behavior), da_(da), monotonic_(monotonic),
+          leftType_(leftCondition), rightType_(rightCondition),
+          leftValue_(leftConditionValue), rightValue_(rightConditionValue) {}
+        LogMixedLinearCubic(const Size n,
+                            CubicInterpolation::DerivativeApprox da,
+                            bool monotonic = true,
+                            CubicInterpolation::BoundaryCondition leftCondition
+                            = CubicInterpolation::SecondDerivative,
+                            Real leftConditionValue = 0.0,
+                            CubicInterpolation::BoundaryCondition rightCondition
+                            = CubicInterpolation::SecondDerivative,
+                            Real rightConditionValue = 0.0)
+        : n_(n), behavior_(MixedInterpolation::ShareRanges), 
+          da_(da), monotonic_(monotonic),
           leftType_(leftCondition), rightType_(rightCondition),
           leftValue_(leftConditionValue), rightValue_(rightConditionValue) {}
         template <class I1, class I2>
