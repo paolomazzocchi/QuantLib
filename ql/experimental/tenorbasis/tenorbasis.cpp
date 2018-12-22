@@ -3,6 +3,7 @@
 /*
  Copyright (C) 2015, 2016 Ferdinando Ametrano
  Copyright (C) 2015, 2016 Paolo Mazzocchi
+ Copyright (C) 2018 Gabriele Giudici
 
  This file is part of QuantLib, a free-software/open-source library
  for financial quantitative analysts and developers - http://quantlib.org/
@@ -62,6 +63,17 @@ namespace QuantLib {
         if (baseIborIndex_->tenor() > tenor_)
             sign_=-1.0;
         registerWith(baseIborIndex_);
+    }
+
+    Real TenorBasis::value(
+            const Array& params,
+            const vector<boost::shared_ptr<RateHelper> >& h) {
+        std::vector<boost::shared_ptr<CalibrationHelperBase> >
+        cH(h.size());
+
+        for (Size i = 0; i < h.size(); ++i)
+            cH[i] = h[i];
+        return CalibratedModel::value(params, cH);
     }
 
     Spread TenorBasis::value(Date d) const {
@@ -609,5 +621,217 @@ namespace QuantLib {
         bootstrap_.calculate();
     }
 
+    AcdtTenorBasis::AcdtTenorBasis(boost::shared_ptr<IborIndex> iborIndex,
+                                   boost::shared_ptr<IborIndex> baseIborIndex,
+                                   Date referenceDate,
+                                   bool isSimple,
+                                   const std::vector<Real>& coeff)
+    : AbcdTenorBasis(iborIndex, baseIborIndex, referenceDate, 
+                     isSimple, coeffAbcd(coeff)) {
+        //std::vector<Real> y = inverse(coeff);
+		std::vector<Real> y = coeff;
+        arguments_[0] = ConstantParameter(y[0], NoConstraint());
+        arguments_[1] = ConstantParameter(y[1], NoConstraint());
+        arguments_[2] = ConstantParameter(y[2], NoConstraint());
+        arguments_[3] = ConstantParameter(y[3], NoConstraint()); //t_max
+        isSimple_ = isSimple;
+        generateArguments();
+	}
+
+    //similar to AbcdTenorBasis::generateArguments()
+    void AcdtTenorBasis::generateArguments() {
+        std::vector<Real> x(4);
+        x[0] = arguments_[0](0.0);//a
+        //fulfilling b with its funcitonal form. 
+        x[1] = b(arguments_);//b
+        x[2] = arguments_[1](0.0);//c
+        x[3] = arguments_[2](0.0);//d
+        //std::vector<Real> y = direct(x);
+        std::vector<Real> y = x;
+        if (isSimple_) {
+            basis_ = shared_ptr<AbcdMathFunction>(
+                new AbcdMathFunction(y[0], y[1], y[2], y[3]));
+			vector<Real> c = basis_->definiteDerivativeCoefficients(0.0, tau_);
+            c[0] *= tau_;
+            c[1] *= tau_;
+            // unaltered c[2] (the c in abcd)
+            c[3] *= tau_;
+            instBasis_ = shared_ptr<AbcdMathFunction>(new AbcdMathFunction(c));
+        }
+        else {
+            instBasis_ = shared_ptr<AbcdMathFunction>(
+                new AbcdMathFunction(y[0], y[1], y[2], y[3]));
+            vector<Real> c =
+                instBasis_->definiteIntegralCoefficients(0.0, tau_);
+            c[0] /= tau_;
+            c[1] /= tau_;
+            // unaltered c[2] (the c in abcd)
+            c[3] /= tau_;
+            basis_ = shared_ptr<AbcdMathFunction>(new AbcdMathFunction(c));
+        }
+    }
+
+    Real AcdtTenorBasis::b(std::vector<Parameter> arguments) {
+        return (arguments[0](0.0)*arguments[1](0.0)) / 
+                                     (1 - arguments[1](0.0)*arguments[3](0.0));
+    }
+
+    std::vector<Real> AcdtTenorBasis::coeffAbcd(std::vector<Real> coeff) {
+        std::vector<Real> coeffAbcd;
+        coeffAbcd.push_back(coeff[0]);//a
+        Real implied_b = (coeff[0] * coeff[1]) / (1 - coeff[1] * coeff[3]);
+        coeffAbcd.push_back(implied_b);//implied b from acdt
+        coeffAbcd.push_back(coeff[1]);//c
+        coeffAbcd.push_back(coeff[2]);//d
+        return coeffAbcd;
+    }
+
+    GlobalHelper::GlobalHelper(
+                    const boost::shared_ptr<TenorBasis>& calibratedModel,
+                    const std::vector<boost::shared_ptr<RateHelper>> & helpers,
+                    boost::shared_ptr<OptimizationMethod> & method,
+                    const EndCriteria & endCriteria,
+                    const std::vector<Real>& weights,
+                    const std::vector<bool>& fixParameters)
+    :calibratedModel_(calibratedModel), helpers_(helpers), method_(method), 
+                      endCriteria_(endCriteria), weights_(weights), 
+                      fixParameters_(fixParameters) {}
+
+    Real GlobalHelper::calibrationError()const
+    {
+        /*it asks its calibratedModel_ to calibrate itself and then asks the error*/
+        calibratedModel_->calibrate(helpers_, *method_, endCriteria_, 
+                                    weights_, fixParameters_);
+        Array values = calibratedModel_->problemValues();
+        Real value = 0;
+        for (Size i = 0; i < values.size(); ++i) {
+            value += values[i]* values[i]* weights_[i];
+        }
+        return value;
+    }
+
+    std::vector<boost::shared_ptr<RateHelper>>& GlobalHelper::getHelpers() {
+        return helpers_;
+    }
+	
+    boost::shared_ptr<OptimizationMethod>& GlobalHelper::getMethod() {
+        return method_;
+    }
+	
+    EndCriteria& GlobalHelper::getEndCriteria() {
+        return endCriteria_;
+    }
+	
+    std::vector<Real>& GlobalHelper::getWeights() {
+        return weights_;
+    }
+	
+    std::vector<bool>& GlobalHelper::getFixParameters() {
+        return fixParameters_;
+    }
+
+    GlobalModel::GlobalModel(
+                Size nArguments,
+                const std::vector<Real>& coeff,
+                const std::vector<boost::shared_ptr<GlobalHelper>> & helpers,
+                const std::vector<int>& position)
+    :CalibratedModel(nArguments), helpers_(helpers), position_(position) {
+        std::vector<Real> y = coeff;
+        for (Size i = 0; i < coeff.size(); ++i) {
+            arguments_[i] = ConstantParameter(y[i], NoConstraint());
+        }
+        generateArguments();
+    }
+
+    void GlobalModel::generateArguments() {
+        std::vector<Real> x(position_.size());
+        for (Size i = 0; i < x.size(); ++i) {
+            x[i] = arguments_[i](0.0);
+        }
+        for (Size j = 0; j < position_.size(); ++j) {
+            {
+            for (Size i = 0; i < helpers_.size(); ++i) {
+                    //get parameters
+                    Array params = helpers_[i]->calibratedModel_->params(); 
+                    // set parameters of interest
+                    params[position_[j]] = x[j];
+                    // change model parameters
+                    helpers_[i]->calibratedModel_->setParams(params);
+                }
+            }
+        }
+    }
+
+    void GlobalModel::calibrate(OptimizationMethod& method,
+                                const EndCriteria& endCriteria,
+                                const std::vector<Real>& weights,
+                                const std::vector<bool>& fixParameters) {
+		std::vector<boost::shared_ptr<CalibrationHelperBase>> 
+                                                     cHelpers(helpers_.size());
+        for (Size i = 0; i < helpers_.size(); ++i)
+            cHelpers[i] = helpers_[i];
+        CalibratedModel::calibrate(cHelpers, method, endCriteria,
+                                   this->constraint(), weights, fixParameters);
+    }
+       
+    Constraint GlobalModel::constraint() const {
+        return NoConstraint();
+    }
+
+    GlobalError::GlobalError(const std::vector<boost::shared_ptr<GlobalHelper>> & helpers,
+                             const std::vector<int>& position,
+                             const int& innerErrorNumber,
+                             const Real& accuracy,
+                             const Real& min,
+                             const Real& max) 
+    :helpers_(helpers), position_(position), innerErrorNumber_(innerErrorNumber), 
+     accuracy_(accuracy), min_(min), max_(max) {}
+
+    Real GlobalError::operator()(Real guess) const {
+        // for understanding which error is currently considered
+        int index = position_.size() - innerErrorNumber_;
+        //set guess in globalhelpers->calibratedModel!
+        Array params;
+        for (Size i = 0; i < helpers_.size(); ++i) {
+            //get parameters
+            params = helpers_[i]->calibratedModel_->params();
+            // set parameters of interest
+            params[position_[index]] = guess; 
+            // change model parameters
+            helpers_[i]->calibratedModel_->setParams(params);
+        }
+        if (innerErrorNumber_ > 1) {
+            innerErrorNumber_--;
+            index = position_.size() - innerErrorNumber_;
+            guess = params[position_[index]];
+            Brent solver;
+            solver.solve(*this, accuracy_, guess, min_, max_);
+            innerErrorNumber_++;
+        }
+        else
+        {
+            //it asks its calibratedModel_
+            for (Size i = 0; i < helpers_.size(); ++i) {
+                helpers_[i]->calibratedModel_->calibrate(
+                                              helpers_[i]->getHelpers(), 
+                                              *helpers_[i]->getMethod(), 
+                                              helpers_[i]->getEndCriteria(), 
+                                              helpers_[i]->getWeights(), 
+                                              helpers_[i]->getFixParameters());
+            }
+            this->value();//set the error
+        }
+        return value_;
+    }
+
+    void GlobalError::value(void) const{
+        Real value_ = 0;
+        Array values;
+        for (Size j = 0; j < helpers_.size(); ++j) {
+            values = helpers_[j]->calibratedModel_->problemValues();
+            for (Size i = 0; i < values.size(); ++i)
+                value_ += values[i] * values[i];
+        }	
+    }
 
 }

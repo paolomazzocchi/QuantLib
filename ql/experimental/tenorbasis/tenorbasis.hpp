@@ -3,6 +3,7 @@
 /*
  Copyright (C) 2015, 2016 Ferdinando Ametrano
  Copyright (C) 2015, 2016 Paolo Mazzocchi
+ Copyright (C) 2018 Gabriele Giudici
 
  This file is part of QuantLib, a free-software/open-source library
  for financial quantitative analysts and developers - http://quantlib.org/
@@ -50,6 +51,9 @@ namespace QuantLib {
         //@{
         //! tenor (simple) basis as function of Date
         Spread value(Date d) const;
+        //! tenor (simple) basis as function of Time
+        Real value(const Array& params, 
+                   const std::vector<boost::shared_ptr<RateHelper>>&h);
         //! tenor (simple) basis as function of Time
         virtual Spread value(Time t) const = 0;
 
@@ -336,8 +340,85 @@ namespace QuantLib {
         IterativeBootstrap<ForwardCorrectedTermStructure> bootstrap_;
     };
 
+    class AcdtTenorBasis : public AbcdTenorBasis {
+        public:
+            AcdtTenorBasis(boost::shared_ptr<IborIndex> iborIndex,
+                           boost::shared_ptr<IborIndex> baseIborIndex,
+                           Date referenceDate,
+                           bool isSimple,
+                           const std::vector<Real>& coeff);
 
+            void generateArguments();
+            Real b(std::vector<Parameter> param);
+            std::vector<Real> coeffAbcd(std::vector<Real> coeff);
+    };
+
+    class GlobalHelper : public CalibrationHelperBase {
+        public:
+            GlobalHelper(const boost::shared_ptr<TenorBasis>& calibratedModel,
+                         const std::vector<boost::shared_ptr<RateHelper>> & helpers,
+                         boost::shared_ptr<OptimizationMethod> & method,
+                         const EndCriteria  & endCriteria,
+                         const std::vector<Real> & weights,
+                         const std::vector<bool> & fixParameters);
+
+            Real calibrationError()const;
+            std::vector<boost::shared_ptr<RateHelper>>& getHelpers();
+            boost::shared_ptr<OptimizationMethod>& getMethod();
+            EndCriteria& getEndCriteria();
+            std::vector<Real>& getWeights();
+            std::vector<bool>& getFixParameters();
+
+            boost::shared_ptr<TenorBasis> calibratedModel_;
+        protected:
+            std::vector<boost::shared_ptr<RateHelper>> helpers_;
+            boost::shared_ptr<OptimizationMethod> method_;
+            EndCriteria endCriteria_;
+            std::vector<Real> weights_;
+            std::vector<bool> fixParameters_;
+    };
+
+    class GlobalModel : public CalibratedModel {
+    public:
+        GlobalModel(Size nArguments,
+                const std::vector<Real>& coeff,
+                const std::vector<boost::shared_ptr<GlobalHelper>> & helpers,
+                const std::vector<int>& position);
+
+        void generateArguments();
+        virtual Constraint constraint() const;
+
+        void calibrate(OptimizationMethod& method,
+                       const EndCriteria& endCriteria,
+                       const std::vector<Real>& weights,
+                       const std::vector<bool>& fixParameters);
+    protected:
+        std::vector<int> position_;
+        std::vector<boost::shared_ptr<GlobalHelper>> helpers_;
+	};
+
+    class GlobalError {
+        public:
+            GlobalError(
+                const std::vector<boost::shared_ptr<GlobalHelper>> & helpers,
+                const std::vector<int>& position,
+                const int& innerErrorNumber,
+                const Real& accuracy,
+                const Real& min,
+                const Real& max);
+
+        Real operator()(Real guess)const;
+        void value(void)const;
+        private:
+            std::vector<boost::shared_ptr<GlobalHelper>> helpers_;
+            Brent firstSolver_;
+            mutable int innerErrorNumber_;
+            std::vector<int> position_;
+            Real accuracy_;
+            Real min_;
+            Real max_;
+            mutable Real value_;
+    };
 }
-
 
 #endif
